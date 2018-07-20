@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 
 import Header from './Header';
-import Login from './Login';
+import Login from './auth/Login';
 import Chatbox from './Chatbox';
 
 export default class App extends Component {
