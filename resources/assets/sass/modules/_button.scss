@@ -1,0 +1,17 @@
+.form-submit {
+  display: block;
+  margin: 1rem auto 0;
+  background-color: $colour-3;
+  border: 2px solid $colour-2;
+  padding: .5rem 1rem;
+  border-radius: 5px;
+
+  font-size: 1rem;
+  color: white;
+  font-weight: 700;
+
+  &:hover {
+    cursor: pointer;
+    background-color: $colour-2;
+  }
+}

@@ -1,6 +1,14 @@
 .login-form {
   margin-top: 2.5rem;
 
+  & .alert {
+    padding: 1rem;
+    background-color: rgba(48, 242, 54, 0.25);
+    border: 1px solid #30f236;
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+
   & .form-group {
     text-align: center;
 
@@ -11,29 +19,40 @@
       margin-right: 1rem;
     }
 
-    & input[type=text] {
+    & input[type=text], & input[type=password] {
       border: 1px solid #000000;
       border-radius: 3px;
       padding: .25rem .5rem;
       font-size: 1rem;
     }
-    
+
+    & input[type=password] {
+      margin-top: 1rem;
+    }
+
     & .form-submit {
-      display: block;
-      margin: 1rem auto 0;
-      background-color: $colour-3;
-      border: 2px solid $colour-2;
-      padding: .5rem 1rem;
-      border-radius: 5px;
 
-      font-size: 1rem;
-      color: white;
-      font-weight: 700;
+    }
+  }
+}
 
-      &:hover {
-        cursor: pointer;
-        background-color: $colour-2;
-      }
+hr.divider {
+  height: 0px;
+  border: 1px solid #afafaf;
+  margin-top: 2.5rem;
+  width: 400px;
+}
+
+p.register-link {
+  text-align: center;
+  margin-top: 2.5rem;
+
+  & a {
+    color: #337ab7;
+    text-decoration: none;
+    
+    &:hover {
+      text-decoration: underline;
     }
   }
 }

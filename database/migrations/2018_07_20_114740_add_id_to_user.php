@@ -13,7 +13,9 @@ class AddIdToUser extends Migration
      */
     public function up()
     {
-        //
+        Schema::table('users', function(Blueprint $table) {
+            $table->increments('id')->first();
+        });
     }
 
     /**
@@ -23,6 +25,8 @@ class AddIdToUser extends Migration
      */
     public function down()
     {
-        //
+        Schema::table('users', function(Blueprint $table) {
+            $table->dropColumn('id');
+        });
     }
 }

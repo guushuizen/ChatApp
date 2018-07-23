@@ -13,7 +13,9 @@ class AddUsernameToChatmessage extends Migration
      */
     public function up()
     {
-        //
+        Schema::table('chat_messages', function (Blueprint $table) {
+            $table->string('username')->after('user_id');
+        });
     }
 
     /**
@@ -23,6 +25,8 @@ class AddUsernameToChatmessage extends Migration
      */
     public function down()
     {
-        //
+        Schema::table('chat_messages', function (Blueprint $table) {
+            $table->dropColumn('username');
+        });
     }
 }
