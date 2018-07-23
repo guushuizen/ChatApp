@@ -20,7 +20,6 @@ export default class Box extends Component {
             <div className="box-container">
                 <div id="messages">
                     { this.props.messages.map(function (message, i, messages) {
-                        console.log(`Message #${i}: ${message.message}`);
                         return (
                             <div key={message.id + '-div'}>
                                 <Splitter messages={messages} currentIndex={i} key={message.id + "-splitter"}/>

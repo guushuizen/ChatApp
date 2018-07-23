@@ -15,8 +15,13 @@ export default class Form extends Component {
     }
 
     sendMessage() {
-        let message = document.querySelector("textarea[name=message]").value;
-        console.log(message);
+        let chatMessage = document.querySelector("textarea[name=message]").value;
+
+        let message = {
+            type: 'new_message',
+            message: chatMessage
+        };
+
         this.props.submit(event, message);
     }
 

@@ -6,9 +6,11 @@
 //modules
 @import "modules/container";
 @import 'modules/normalize';
+@import 'modules/button';
 
 //partials
 @import 'partials/header';
 @import 'partials/login';
 @import 'partials/box';
 @import 'partials/messages';
+@import 'partials/register';

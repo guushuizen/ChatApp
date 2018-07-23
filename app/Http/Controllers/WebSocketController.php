@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\User;
 use Ratchet\ConnectionInterface;
 use Ratchet\MessageComponentInterface;
 use App\ChatMessage;
@@ -14,7 +15,7 @@ class WebSocketController extends Controller implements MessageComponentInterfac
      * {
      *  [401] {
      *      'conn' => [Connection object]
-     *      'username' => 'username'
+     *      'user_id' => 'username'
      *      'messages' => [Messages array]
      *  }
      * }
@@ -22,7 +23,6 @@ class WebSocketController extends Controller implements MessageComponentInterfac
      */
 
     private $connections = [];
-    private $messages = [];
 
     /**
      * WebSocketController constructor.
@@ -79,29 +79,41 @@ class WebSocketController extends Controller implements MessageComponentInterfac
 
     function onMessage(ConnectionInterface $conn, $msg)
     {
-//        echo PHP_EOL . print_r($this->connections[$conn->resourceId]);
-        if (!isset($this->connections[$conn->resourceId]['username'])) {
-            $this->connections[$conn->resourceId]['username'] = $msg;
+        $data = json_decode($msg, true);
+        if ($data['type'] == 'identification') {
+            $this->connections[$conn->resourceId]['username'] = $data['username'];
+            $this->connections[$conn->resourceId]['user_id'] = $data['user_id'];
+
+            echo PHP_EOL . $this->connections[$conn->resourceId]['username'] . PHP_EOL;
 
             $conn->send(json_encode(array(
                 'type' => 'welcome',
                 'messages' => ChatMessage::orderByDesc('created_at')->get(),
             )));
 
+            echo 'sent messages';
+
             echo PHP_EOL . 'Connection with ID: ' . $conn->resourceId . ' connected with username ' . $msg;
-        } else {
+        } else
+        if ($data['type'] == 'new_message') {
             // Not first message, thus we add the $msg to the owner's messages list and broadcast the message.
             $newMessage = ChatMessage::create(array(
+                'user_id' => $this->connections[$conn->resourceId]['user_id'],
                 'username' => $this->connections[$conn->resourceId]['username'],
-                'message' => $msg,
+                'message' => $data['message'],
                 'created_at' => date('j/m/Y G:i')
-
             ));
 
             $this->broadcast($newMessage);
             echo PHP_EOL . 'New message from ' . $this->connections[$conn->resourceId]['username'] . ': ' . $msg;
         }
     }
+
+    /**
+     * Send the new chat message to all connected sockets.
+     *
+     * @param String $msg (The chat message)
+     */
 
     function broadcast($msg) {
         foreach ($this->connections as $connection) {
@@ -114,5 +126,4 @@ class WebSocketController extends Controller implements MessageComponentInterfac
             )));
         }
     }
-
 }

@@ -4,18 +4,23 @@ import ReactDOM from 'react-dom';
 import Header from './Header';
 import Login from './auth/Login';
 import Chatbox from './Chatbox';
+import Register from "./auth/Register";
 
 export default class App extends Component {
     constructor(props) {
         super(props);
         this.state = {
             loggedIn: false,
-            connection: new WebSocket("ws://127.0.0.1:8090"),
-            messages: []
+            connection: new WebSocket("ws://" + window.location.hostname + ":8090"),
+            messages: [],
+            register: false,
+            successfulRegistration: false
         };
         this.handleLogin = this.handleLogin.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleNewMessage = this.handleNewMessage.bind(this);
+        this.showRegisterForm = this.showRegisterForm.bind(this);
+        this.handleSuccessfulRegistration = this.handleSuccessfulRegistration.bind(this);
 
         this.state.connection.onmessage = this.handleNewMessage;
     }
@@ -86,34 +91,58 @@ export default class App extends Component {
         // console.log(this.state.messages);
     }
 
-    handleLogin(event, username) {
-        event.preventDefault();
+    handleLogin(username, user_id) {
+        this.state.connection.send(JSON.stringify({
+            type: 'identification',
+            username: username,
+            user_id: user_id
+        }));
 
-        if (this.state.connection.readyState === WebSocket.OPEN) {
-            this.state.connection.send(username);
-            this.setState({
-                loggedIn: true,
-                username
-            });
-        } else {
-            alert('The server is currently not available, please try again later.')
-        }
+        console.log(JSON.stringify({
+            type: 'identification',
+            username: username,
+            user_id: user_id
+        }));
+
+        this.setState({
+            username,
+            user_id,
+            loggedIn: true
+        })
     }
 
     handleSubmit(event, message) {
         event.preventDefault();
         document.querySelector("textarea[name=message]").value = "";
-        this.state.connection.send(message);
+
+        message.username = this.state.username;
+        message.user_id = this.state.user_id;
+
+        this.state.connection.send(JSON.stringify(message));
+    }
+
+    showRegisterForm() {
+        this.setState({
+            register: true,
+
+        })
+    }
+
+    handleSuccessfulRegistration() {
+        this.setState({
+            register: false,
+            successfulRegistration: true
+        })
     }
 
     render() {
         return (
             <div className="page">
-                <Header loggedIn={this.state.loggedIn} username={this.state.username}></Header>
+                <Header loggedIn={this.state.loggedIn} username={this.state.username} />
 
-                { !this.state.loggedIn && <Login login={this.handleLogin} username={this.state.username}></Login>}
+                { this.state.loggedIn ? <Chatbox submit={this.handleSubmit} messages={this.state.messages} /> : null}
 
-                { this.state.loggedIn && <Chatbox submit={this.handleSubmit} messages={this.state.messages}></Chatbox>}
+                { this.state.register ? <Register handleRegistration={this.handleSuccessfulRegistration}/> : <Login registration={this.state.successfulRegistration} login={this.handleLogin} register={this.showRegisterForm} /> }
             </div>
         );
     }

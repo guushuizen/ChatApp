@@ -13,7 +13,14 @@ class ResetUsersTable extends Migration
      */
     public function up()
     {
-        //
+        Schema::drop('users');
+
+        Schema::create('users', function (Blueprint $table) {
+            $table->string('username');
+            $table->string('email');
+            $table->string('password');
+            $table->timestamps();
+        });
     }
 
     /**
@@ -23,6 +30,16 @@ class ResetUsersTable extends Migration
      */
     public function down()
     {
-        //
+        Schema::drop('users');
+
+        Schema::create('users', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('name');
+            $table->string('email')->unique();
+            $table->timestamp('email_verified_at')->nullable();
+            $table->string('password');
+            $table->rememberToken();
+            $table->timestamps();
+        });
     }
 }
