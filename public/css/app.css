@@ -1,5 +1,6 @@
 @import url(https://fonts.googleapis.com/css?family=Roboto:300,400,700);@import url(https://fonts.googleapis.com/css?family=Open+Sans:300,400,700);@media (max-width: 768px) {
-  .container {
+  .container,
+  .chat-container {
     width: 100%;
   }
 }
@@ -7,6 +8,14 @@
 @media (min-width: 768px) {
   .container {
     width: 75%;
+    margin: 0 auto;
+  }
+
+  .chat-container {
+    width: 75%;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
     margin: 0 auto;
   }
 }
@@ -202,9 +211,14 @@ p.register-link a:hover {
 
 @media (min-width: 768px) {
   .chatbox {
-    width: 50%;
-    margin-left: auto;
-    margin-right: auto;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    width: 75%;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+        -ms-flex-direction: column;
+            flex-direction: column;
   }
 }
 
@@ -247,6 +261,7 @@ p.register-link a:hover {
           flex-grow: 0;
   -ms-flex-negative: 0;
       flex-shrink: 0;
+  width: 50%;
 }
 
 #messages .message-wrapper.self {
@@ -305,6 +320,7 @@ p.register-link a:hover {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
+  max-width: 100%;
 }
 
 #messages .message-wrapper .message span.username {
@@ -387,5 +403,63 @@ p.register-link a:hover {
     margin-left: auto;
     margin-right: auto;
   }
+}
+
+.channels {
+  margin-top: 2.5rem;
+  width: 23%;
+  height: 100%;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  margin-left: 2%;
+  background-color: #f2f2f2;
+  padding: 1rem;
+  border-radius: 5px;
+}
+
+.channels h1.header {
+  font-family: 'Open Sans', sans-serif;
+  letter-spacing: -1px;
+  text-align: center;
+  margin: 0;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 1.5rem;
+  color: #3A3A3A;
+}
+
+.channels p.current {
+  text-align: center;
+}
+
+.channels form {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -ms-flex-item-align: center;
+      align-self: center;
+  margin-top: 1rem;
+}
+
+.channels form input[type=text] {
+  border: 1px solid #000000;
+  border-radius: 3px;
+  padding: .25rem .5rem;
+  font-size: 1rem;
+  width: 100%;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-item-align: center;
+      align-self: center;
 }
 

@@ -29180,9 +29180,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_react_dom__ = __webpack_require__(169);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_react_dom___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_react_dom__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__Header__ = __webpack_require__(181);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__auth_Login__ = __webpack_require__(226);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__auth_Login__ = __webpack_require__(234);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__Chatbox__ = __webpack_require__(183);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__auth_Register__ = __webpack_require__(227);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__auth_Register__ = __webpack_require__(253);
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -29212,13 +29212,15 @@ var App = function (_Component) {
             connection: new WebSocket("ws://" + window.location.hostname + ":8090"),
             messages: [],
             register: false,
-            successfulRegistration: false
+            successfulRegistration: false,
+            room: ''
         };
         _this.handleLogin = _this.handleLogin.bind(_this);
         _this.handleSubmit = _this.handleSubmit.bind(_this);
         _this.handleNewMessage = _this.handleNewMessage.bind(_this);
         _this.showRegisterForm = _this.showRegisterForm.bind(_this);
         _this.handleSuccessfulRegistration = _this.handleSuccessfulRegistration.bind(_this);
+        _this.handleChannelSwitch = _this.handleChannelSwitch.bind(_this);
 
         _this.state.connection.onmessage = _this.handleNewMessage;
         return _this;
@@ -29283,12 +29285,42 @@ var App = function (_Component) {
                 });
 
                 this.setState({
+                    room: data.room,
                     messages: _newMessages
                 });
 
                 document.querySelector('.box-container').scrollTop = document.querySelector('.box-container').scrollHeight;
+            } else if (data.type === 'room-switch') {
+                var _newMessages2 = [];
+                var _username = this.state.username;
+                console.log(data);
+
+                data.messages.map(function (message) {
+                    var html = '';
+
+                    if (message.username === _username) {
+                        html = '<span class=\'username\'>You:</span> ' + message.message;
+                    } else {
+                        html = '<span class=\'username\'>' + message.username + ':</span> ' + message.message;
+                    }
+
+                    var newMessage = {
+                        'id': message.id,
+                        'username': message.username,
+                        'message': message.message,
+                        'self': message.username === _username,
+                        'time': message.created_at,
+                        'html': html
+                    };
+
+                    _newMessages2.push(newMessage);
+                });
+
+                this.setState({
+                    room: data.room,
+                    messages: _newMessages2
+                });
             }
-            // console.log(this.state.messages);
         }
     }, {
         key: 'handleLogin',
@@ -29319,6 +29351,7 @@ var App = function (_Component) {
 
             message.username = this.state.username;
             message.user_id = this.state.user_id;
+            message.room = this.state.room;
 
             this.state.connection.send(JSON.stringify(message));
         }
@@ -29339,14 +29372,26 @@ var App = function (_Component) {
             });
         }
     }, {
+        key: 'handleChannelSwitch',
+        value: function handleChannelSwitch(newRoom) {
+            this.state.connection.send(JSON.stringify({
+                type: 'room-switch',
+                username: this.state.username,
+                room: newRoom
+            }));
+
+            this.setState({
+                messages: []
+            });
+        }
+    }, {
         key: 'render',
         value: function render() {
             return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
                 'div',
                 { className: 'page' },
                 __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_2__Header__["a" /* default */], { loggedIn: this.state.loggedIn, username: this.state.username }),
-                this.state.loggedIn ? __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_4__Chatbox__["a" /* default */], { submit: this.handleSubmit, messages: this.state.messages }) : null,
-                this.state.register ? __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_5__auth_Register__["a" /* default */], { handleRegistration: this.handleSuccessfulRegistration }) : __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_3__auth_Login__["a" /* default */], { registration: this.state.successfulRegistration, login: this.handleLogin, register: this.showRegisterForm })
+                this.state.loggedIn ? __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_4__Chatbox__["a" /* default */], { changeChannel: this.handleChannelSwitch, currentChannel: this.state.room, submit: this.handleSubmit, messages: this.state.messages }) : this.state.register ? __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_5__auth_Register__["a" /* default */], { handleRegistration: this.handleSuccessfulRegistration }) : __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_3__auth_Login__["a" /* default */], { registration: this.state.successfulRegistration, login: this.handleLogin, register: this.showRegisterForm })
             );
         }
     }]);
@@ -48826,6 +48871,7 @@ var Header = function (_Component) {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_react__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__chatbox_Box__ = __webpack_require__(184);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__chatbox_Form__ = __webpack_require__(220);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__chatbox_Channels__ = __webpack_require__(255);
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -48833,6 +48879,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
 
 
 
@@ -48852,7 +48899,7 @@ var Chatbox = function (_Component) {
         value: function render() {
             return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
                 'div',
-                { className: 'container' },
+                { className: 'chat-container' },
                 __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
                     'div',
                     { className: 'chatbox' },
@@ -48863,7 +48910,8 @@ var Chatbox = function (_Component) {
                     ),
                     __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_1__chatbox_Box__["a" /* default */], { messages: this.props.messages }),
                     __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_2__chatbox_Form__["a" /* default */], { submit: this.props.submit })
-                )
+                ),
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_3__chatbox_Channels__["a" /* default */], { channelSwitch: this.props.changeChannel, currentChannel: this.props.currentChannel })
             );
         }
     }]);
@@ -48893,7 +48941,6 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 
 
-// import moment from 'moment';
 
 var Box = function (_Component) {
     _inherits(Box, _Component);
@@ -48912,7 +48959,6 @@ var Box = function (_Component) {
     }, {
         key: 'render',
         value: function render() {
-            console.log(this.props.messages[1]);
             return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
                 'div',
                 { className: 'box-container' },
@@ -48921,7 +48967,7 @@ var Box = function (_Component) {
                     { id: 'messages' },
                     this.props.messages.map(function (message, i, messages) {
                         return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                            'div',
+                            __WEBPACK_IMPORTED_MODULE_0_react___default.a.Fragment,
                             { key: message.id + '-div' },
                             __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_2__Splitter__["a" /* default */], { messages: messages, currentIndex: i, key: message.id + "-splitter" }),
                             __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_1__Message__["a" /* default */], { message: message, key: message.id })
@@ -52639,266 +52685,13 @@ var Form = function (_Component) {
 /* 224 */,
 /* 225 */,
 /* 226 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_react__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_axios__ = __webpack_require__(236);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_axios___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_axios__);
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-
-
-
-var Login = function (_Component) {
-    _inherits(Login, _Component);
-
-    function Login(props) {
-        _classCallCheck(this, Login);
-
-        var _this = _possibleConstructorReturn(this, (Login.__proto__ || Object.getPrototypeOf(Login)).call(this, props));
-
-        _this.login = _this.login.bind(_this);
-        // this.username = this.username.bind(this);
-        return _this;
-    }
-
-    _createClass(Login, [{
-        key: 'login',
-        value: function login(event) {
-            var username = document.querySelector("input[name=username]").value;
-            var password = document.querySelector("input[name=password]").value;
-            var handleLogin = this.props.login;
-            // this.props.login(event, username);
-            event.preventDefault();
-
-            __WEBPACK_IMPORTED_MODULE_1_axios___default.a.post('/api/login', {
-                username: username,
-                password: password
-            }).then(function (response) {
-                handleLogin(response.data.username, response.data.user_id);
-            }).catch(function (error) {
-                console.log(error);
-            });
-        }
-    }, {
-        key: 'render',
-        value: function render() {
-            return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                'div',
-                { className: 'login-form' },
-                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                    'div',
-                    { className: 'container' },
-                    this.props.registration && __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                        'div',
-                        { className: 'alert' },
-                        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                            'b',
-                            null,
-                            'Great!'
-                        ),
-                        ' You have successfully registered and can now log in!'
-                    ),
-                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                        'form',
-                        { className: 'form-group', onSubmit: this.login },
-                        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                            'div',
-                            null,
-                            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                                'label',
-                                { htmlFor: 'username' },
-                                'Username:'
-                            ),
-                            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('input', { type: 'text', name: 'username' })
-                        ),
-                        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                            'div',
-                            null,
-                            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                                'label',
-                                { htmlFor: 'Password' },
-                                'Password:'
-                            ),
-                            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('input', { type: 'password', name: 'password' })
-                        ),
-                        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('input', { type: 'submit', className: 'form-submit', value: 'Log in' })
-                    ),
-                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('hr', { className: 'divider' }),
-                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                        'p',
-                        { className: 'register-link' },
-                        'New? ',
-                        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                            'a',
-                            { href: '#', onClick: this.props.register },
-                            'Register now!'
-                        )
-                    )
-                )
-            );
-        }
-    }]);
-
-    return Login;
-}(__WEBPACK_IMPORTED_MODULE_0_react__["Component"]);
-
-/* harmony default export */ __webpack_exports__["a"] = (Login);
-
-/***/ }),
-/* 227 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_react__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__FormInput__ = __webpack_require__(228);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_axios__ = __webpack_require__(236);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_axios___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_axios__);
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-
-
-
-
-var Register = function (_Component) {
-    _inherits(Register, _Component);
-
-    function Register(props) {
-        _classCallCheck(this, Register);
-
-        var _this = _possibleConstructorReturn(this, (Register.__proto__ || Object.getPrototypeOf(Register)).call(this, props));
-
-        _this.handleSubmit = _this.handleSubmit.bind(_this);
-        return _this;
-    }
-
-    _createClass(Register, [{
-        key: 'handleSubmit',
-        value: function handleSubmit(event) {
-            event.preventDefault();
-
-            var username = document.querySelector('input[name=username]').value;
-            var email = document.querySelector('input[name=email').value;
-            var password = document.querySelector('input[name=password').value;
-
-            var handleSuccess = this.props.handleRegistration;
-
-            __WEBPACK_IMPORTED_MODULE_2_axios___default.a.post('/api/register', {
-                username: username,
-                email: email,
-                password: password
-            }).then(function (response) {
-                handleSuccess();
-            }).catch(function (error) {
-                console.log(error);
-            });
-        }
-    }, {
-        key: 'render',
-        value: function render() {
-            return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                'div',
-                { className: 'register-form' },
-                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                    'div',
-                    { className: 'container' },
-                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                        'h1',
-                        { className: 'header' },
-                        'Register'
-                    ),
-                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                        'form',
-                        { action: '#', onSubmit: this.handleSubmit, className: 'form-wrapper' },
-                        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_1__FormInput__["a" /* default */], { name: 'Username' }),
-                        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_1__FormInput__["a" /* default */], { name: 'Email' }),
-                        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_1__FormInput__["a" /* default */], { name: 'Password' }),
-                        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('input', { type: 'submit', className: 'form-submit', value: 'Register' })
-                    )
-                )
-            );
-        }
-    }]);
-
-    return Register;
-}(__WEBPACK_IMPORTED_MODULE_0_react__["Component"]);
-
-/* harmony default export */ __webpack_exports__["a"] = (Register);
-
-/***/ }),
-/* 228 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_react__);
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-
-
-var FormInput = function (_Component) {
-    _inherits(FormInput, _Component);
-
-    function FormInput(props) {
-        _classCallCheck(this, FormInput);
-
-        return _possibleConstructorReturn(this, (FormInput.__proto__ || Object.getPrototypeOf(FormInput)).call(this, props));
-    }
-
-    _createClass(FormInput, [{
-        key: 'render',
-        value: function render() {
-            var className = "form-group " + this.props.name.toLowerCase();
-            return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                'div',
-                { className: className },
-                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                    'label',
-                    { htmlFor: this.props.name.toLowerCase() },
-                    this.props.name,
-                    ':'
-                ),
-                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('input', { type: this.props.name === 'Email' ? 'email' : this.props.name === 'Password' ? 'password' : 'text',
-                    name: this.props.name.toLowerCase(), className: 'form-control' })
-            );
-        }
-    }]);
-
-    return FormInput;
-}(__WEBPACK_IMPORTED_MODULE_0_react__["Component"]);
-
-/* harmony default export */ __webpack_exports__["a"] = (FormInput);
-
-/***/ }),
-/* 229 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var bind = __webpack_require__(231);
-var isBuffer = __webpack_require__(238);
+var bind = __webpack_require__(229);
+var isBuffer = __webpack_require__(236);
 
 /*global toString:true*/
 
@@ -53201,14 +52994,14 @@ module.exports = {
 
 
 /***/ }),
-/* 230 */
+/* 227 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(process) {
 
-var utils = __webpack_require__(229);
-var normalizeHeaderName = __webpack_require__(240);
+var utils = __webpack_require__(226);
+var normalizeHeaderName = __webpack_require__(238);
 
 var DEFAULT_CONTENT_TYPE = {
   'Content-Type': 'application/x-www-form-urlencoded'
@@ -53224,10 +53017,10 @@ function getDefaultAdapter() {
   var adapter;
   if (typeof XMLHttpRequest !== 'undefined') {
     // For browsers use XHR adapter
-    adapter = __webpack_require__(232);
+    adapter = __webpack_require__(230);
   } else if (typeof process !== 'undefined') {
     // For node use HTTP adapter
-    adapter = __webpack_require__(232);
+    adapter = __webpack_require__(230);
   }
   return adapter;
 }
@@ -53305,7 +53098,13 @@ module.exports = defaults;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
 
 /***/ }),
-/* 231 */
+/* 228 */
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports = __webpack_require__(235);
+
+/***/ }),
+/* 229 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -53323,19 +53122,19 @@ module.exports = function bind(fn, thisArg) {
 
 
 /***/ }),
-/* 232 */
+/* 230 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var utils = __webpack_require__(229);
-var settle = __webpack_require__(241);
-var buildURL = __webpack_require__(243);
-var parseHeaders = __webpack_require__(244);
-var isURLSameOrigin = __webpack_require__(245);
-var createError = __webpack_require__(233);
-var btoa = (typeof window !== 'undefined' && window.btoa && window.btoa.bind(window)) || __webpack_require__(246);
+var utils = __webpack_require__(226);
+var settle = __webpack_require__(239);
+var buildURL = __webpack_require__(241);
+var parseHeaders = __webpack_require__(242);
+var isURLSameOrigin = __webpack_require__(243);
+var createError = __webpack_require__(231);
+var btoa = (typeof window !== 'undefined' && window.btoa && window.btoa.bind(window)) || __webpack_require__(244);
 
 module.exports = function xhrAdapter(config) {
   return new Promise(function dispatchXhrRequest(resolve, reject) {
@@ -53432,7 +53231,7 @@ module.exports = function xhrAdapter(config) {
     // This is only done if running in a standard browser environment.
     // Specifically not if we're in a web worker, or react-native.
     if (utils.isStandardBrowserEnv()) {
-      var cookies = __webpack_require__(247);
+      var cookies = __webpack_require__(245);
 
       // Add xsrf header
       var xsrfValue = (config.withCredentials || isURLSameOrigin(config.url)) && config.xsrfCookieName ?
@@ -53510,13 +53309,13 @@ module.exports = function xhrAdapter(config) {
 
 
 /***/ }),
-/* 233 */
+/* 231 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var enhanceError = __webpack_require__(242);
+var enhanceError = __webpack_require__(240);
 
 /**
  * Create an Error with the specified message, config, error code, request and response.
@@ -53535,7 +53334,7 @@ module.exports = function createError(message, config, code, request, response) 
 
 
 /***/ }),
-/* 234 */
+/* 232 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -53547,7 +53346,7 @@ module.exports = function isCancel(value) {
 
 
 /***/ }),
-/* 235 */
+/* 233 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -53573,22 +53372,132 @@ module.exports = Cancel;
 
 
 /***/ }),
-/* 236 */
-/***/ (function(module, exports, __webpack_require__) {
+/* 234 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
-module.exports = __webpack_require__(237);
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_react__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_axios__ = __webpack_require__(228);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_axios___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_axios__);
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+
+
+
+var Login = function (_Component) {
+    _inherits(Login, _Component);
+
+    function Login(props) {
+        _classCallCheck(this, Login);
+
+        var _this = _possibleConstructorReturn(this, (Login.__proto__ || Object.getPrototypeOf(Login)).call(this, props));
+
+        _this.login = _this.login.bind(_this);
+        // this.username = this.username.bind(this);
+        return _this;
+    }
+
+    _createClass(Login, [{
+        key: 'login',
+        value: function login(event) {
+            var username = document.querySelector("input[name=username]").value;
+            var password = document.querySelector("input[name=password]").value;
+            var handleLogin = this.props.login;
+            // this.props.login(event, username);
+            event.preventDefault();
+
+            __WEBPACK_IMPORTED_MODULE_1_axios___default.a.post('/api/login', {
+                username: username,
+                password: password
+            }).then(function (response) {
+                handleLogin(response.data.username, response.data.user_id);
+            }).catch(function (error) {
+                console.log(error);
+            });
+        }
+    }, {
+        key: 'render',
+        value: function render() {
+            return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                'div',
+                { className: 'login-form' },
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                    'div',
+                    { className: 'container' },
+                    this.props.registration && __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                        'div',
+                        { className: 'alert' },
+                        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                            'b',
+                            null,
+                            'Great!'
+                        ),
+                        ' You have successfully registered and can now log in!'
+                    ),
+                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                        'form',
+                        { className: 'form-group', onSubmit: this.login },
+                        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                            'div',
+                            null,
+                            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                                'label',
+                                { htmlFor: 'username' },
+                                'Username:'
+                            ),
+                            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('input', { type: 'text', name: 'username' })
+                        ),
+                        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                            'div',
+                            null,
+                            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                                'label',
+                                { htmlFor: 'Password' },
+                                'Password:'
+                            ),
+                            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('input', { type: 'password', name: 'password' })
+                        ),
+                        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('input', { type: 'submit', className: 'form-submit', value: 'Log in' })
+                    ),
+                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('hr', { className: 'divider' }),
+                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                        'p',
+                        { className: 'register-link' },
+                        'New? ',
+                        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                            'a',
+                            { href: '#', onClick: this.props.register },
+                            'Register now!'
+                        )
+                    )
+                )
+            );
+        }
+    }]);
+
+    return Login;
+}(__WEBPACK_IMPORTED_MODULE_0_react__["Component"]);
+
+/* harmony default export */ __webpack_exports__["a"] = (Login);
 
 /***/ }),
-/* 237 */
+/* 235 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var utils = __webpack_require__(229);
-var bind = __webpack_require__(231);
-var Axios = __webpack_require__(239);
-var defaults = __webpack_require__(230);
+var utils = __webpack_require__(226);
+var bind = __webpack_require__(229);
+var Axios = __webpack_require__(237);
+var defaults = __webpack_require__(227);
 
 /**
  * Create an instance of Axios
@@ -53621,15 +53530,15 @@ axios.create = function create(instanceConfig) {
 };
 
 // Expose Cancel & CancelToken
-axios.Cancel = __webpack_require__(235);
-axios.CancelToken = __webpack_require__(253);
-axios.isCancel = __webpack_require__(234);
+axios.Cancel = __webpack_require__(233);
+axios.CancelToken = __webpack_require__(251);
+axios.isCancel = __webpack_require__(232);
 
 // Expose all/spread
 axios.all = function all(promises) {
   return Promise.all(promises);
 };
-axios.spread = __webpack_require__(254);
+axios.spread = __webpack_require__(252);
 
 module.exports = axios;
 
@@ -53638,7 +53547,7 @@ module.exports.default = axios;
 
 
 /***/ }),
-/* 238 */
+/* 236 */
 /***/ (function(module, exports) {
 
 /*!
@@ -53665,16 +53574,16 @@ function isSlowBuffer (obj) {
 
 
 /***/ }),
-/* 239 */
+/* 237 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var defaults = __webpack_require__(230);
-var utils = __webpack_require__(229);
-var InterceptorManager = __webpack_require__(248);
-var dispatchRequest = __webpack_require__(249);
+var defaults = __webpack_require__(227);
+var utils = __webpack_require__(226);
+var InterceptorManager = __webpack_require__(246);
+var dispatchRequest = __webpack_require__(247);
 
 /**
  * Create a new instance of Axios
@@ -53751,13 +53660,13 @@ module.exports = Axios;
 
 
 /***/ }),
-/* 240 */
+/* 238 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var utils = __webpack_require__(229);
+var utils = __webpack_require__(226);
 
 module.exports = function normalizeHeaderName(headers, normalizedName) {
   utils.forEach(headers, function processHeader(value, name) {
@@ -53770,13 +53679,13 @@ module.exports = function normalizeHeaderName(headers, normalizedName) {
 
 
 /***/ }),
-/* 241 */
+/* 239 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var createError = __webpack_require__(233);
+var createError = __webpack_require__(231);
 
 /**
  * Resolve or reject a Promise based on response status.
@@ -53803,7 +53712,7 @@ module.exports = function settle(resolve, reject, response) {
 
 
 /***/ }),
-/* 242 */
+/* 240 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -53831,13 +53740,13 @@ module.exports = function enhanceError(error, config, code, request, response) {
 
 
 /***/ }),
-/* 243 */
+/* 241 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var utils = __webpack_require__(229);
+var utils = __webpack_require__(226);
 
 function encode(val) {
   return encodeURIComponent(val).
@@ -53904,13 +53813,13 @@ module.exports = function buildURL(url, params, paramsSerializer) {
 
 
 /***/ }),
-/* 244 */
+/* 242 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var utils = __webpack_require__(229);
+var utils = __webpack_require__(226);
 
 // Headers whose duplicates are ignored by node
 // c.f. https://nodejs.org/api/http.html#http_message_headers
@@ -53964,13 +53873,13 @@ module.exports = function parseHeaders(headers) {
 
 
 /***/ }),
-/* 245 */
+/* 243 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var utils = __webpack_require__(229);
+var utils = __webpack_require__(226);
 
 module.exports = (
   utils.isStandardBrowserEnv() ?
@@ -54039,7 +53948,7 @@ module.exports = (
 
 
 /***/ }),
-/* 246 */
+/* 244 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -54082,13 +53991,13 @@ module.exports = btoa;
 
 
 /***/ }),
-/* 247 */
+/* 245 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var utils = __webpack_require__(229);
+var utils = __webpack_require__(226);
 
 module.exports = (
   utils.isStandardBrowserEnv() ?
@@ -54142,13 +54051,13 @@ module.exports = (
 
 
 /***/ }),
-/* 248 */
+/* 246 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var utils = __webpack_require__(229);
+var utils = __webpack_require__(226);
 
 function InterceptorManager() {
   this.handlers = [];
@@ -54201,18 +54110,18 @@ module.exports = InterceptorManager;
 
 
 /***/ }),
-/* 249 */
+/* 247 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var utils = __webpack_require__(229);
-var transformData = __webpack_require__(250);
-var isCancel = __webpack_require__(234);
-var defaults = __webpack_require__(230);
-var isAbsoluteURL = __webpack_require__(251);
-var combineURLs = __webpack_require__(252);
+var utils = __webpack_require__(226);
+var transformData = __webpack_require__(248);
+var isCancel = __webpack_require__(232);
+var defaults = __webpack_require__(227);
+var isAbsoluteURL = __webpack_require__(249);
+var combineURLs = __webpack_require__(250);
 
 /**
  * Throws a `Cancel` if cancellation has been requested.
@@ -54294,13 +54203,13 @@ module.exports = function dispatchRequest(config) {
 
 
 /***/ }),
-/* 250 */
+/* 248 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var utils = __webpack_require__(229);
+var utils = __webpack_require__(226);
 
 /**
  * Transform the data for a request or a response
@@ -54321,7 +54230,7 @@ module.exports = function transformData(data, headers, fns) {
 
 
 /***/ }),
-/* 251 */
+/* 249 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -54342,7 +54251,7 @@ module.exports = function isAbsoluteURL(url) {
 
 
 /***/ }),
-/* 252 */
+/* 250 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -54363,13 +54272,13 @@ module.exports = function combineURLs(baseURL, relativeURL) {
 
 
 /***/ }),
-/* 253 */
+/* 251 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var Cancel = __webpack_require__(235);
+var Cancel = __webpack_require__(233);
 
 /**
  * A `CancelToken` is an object that can be used to request cancellation of an operation.
@@ -54427,7 +54336,7 @@ module.exports = CancelToken;
 
 
 /***/ }),
-/* 254 */
+/* 252 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -54459,6 +54368,222 @@ module.exports = function spread(callback) {
   };
 };
 
+
+/***/ }),
+/* 253 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_react__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__FormInput__ = __webpack_require__(254);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_axios__ = __webpack_require__(228);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_axios___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_axios__);
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+
+
+
+
+var Register = function (_Component) {
+    _inherits(Register, _Component);
+
+    function Register(props) {
+        _classCallCheck(this, Register);
+
+        var _this = _possibleConstructorReturn(this, (Register.__proto__ || Object.getPrototypeOf(Register)).call(this, props));
+
+        _this.handleSubmit = _this.handleSubmit.bind(_this);
+        return _this;
+    }
+
+    _createClass(Register, [{
+        key: 'handleSubmit',
+        value: function handleSubmit(event) {
+            event.preventDefault();
+
+            var username = document.querySelector('input[name=username]').value;
+            var email = document.querySelector('input[name=email').value;
+            var password = document.querySelector('input[name=password').value;
+
+            var handleSuccess = this.props.handleRegistration;
+
+            __WEBPACK_IMPORTED_MODULE_2_axios___default.a.post('/api/register', {
+                username: username,
+                email: email,
+                password: password
+            }).then(function (response) {
+                handleSuccess();
+            }).catch(function (error) {
+                console.log(error);
+            });
+        }
+    }, {
+        key: 'render',
+        value: function render() {
+            return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                'div',
+                { className: 'register-form' },
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                    'div',
+                    { className: 'container' },
+                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                        'h1',
+                        { className: 'header' },
+                        'Register'
+                    ),
+                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                        'form',
+                        { action: '#', onSubmit: this.handleSubmit, className: 'form-wrapper' },
+                        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_1__FormInput__["a" /* default */], { name: 'Username' }),
+                        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_1__FormInput__["a" /* default */], { name: 'Email' }),
+                        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_1__FormInput__["a" /* default */], { name: 'Password' }),
+                        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('input', { type: 'submit', className: 'form-submit', value: 'Register' })
+                    )
+                )
+            );
+        }
+    }]);
+
+    return Register;
+}(__WEBPACK_IMPORTED_MODULE_0_react__["Component"]);
+
+/* harmony default export */ __webpack_exports__["a"] = (Register);
+
+/***/ }),
+/* 254 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_react__);
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+
+
+var FormInput = function (_Component) {
+    _inherits(FormInput, _Component);
+
+    function FormInput(props) {
+        _classCallCheck(this, FormInput);
+
+        return _possibleConstructorReturn(this, (FormInput.__proto__ || Object.getPrototypeOf(FormInput)).call(this, props));
+    }
+
+    _createClass(FormInput, [{
+        key: 'render',
+        value: function render() {
+            var className = "form-group " + this.props.name.toLowerCase();
+            return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                'div',
+                { className: className },
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                    'label',
+                    { htmlFor: this.props.name.toLowerCase() },
+                    this.props.name,
+                    ':'
+                ),
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('input', { type: this.props.name === 'Email' ? 'email' : this.props.name === 'Password' ? 'password' : 'text',
+                    name: this.props.name.toLowerCase(), className: 'form-control' })
+            );
+        }
+    }]);
+
+    return FormInput;
+}(__WEBPACK_IMPORTED_MODULE_0_react__["Component"]);
+
+/* harmony default export */ __webpack_exports__["a"] = (FormInput);
+
+/***/ }),
+/* 255 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_react__);
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+
+
+var Channels = function (_Component) {
+    _inherits(Channels, _Component);
+
+    function Channels(props) {
+        _classCallCheck(this, Channels);
+
+        var _this = _possibleConstructorReturn(this, (Channels.__proto__ || Object.getPrototypeOf(Channels)).call(this, props));
+
+        _this.changeChannel = _this.changeChannel.bind(_this);
+        return _this;
+    }
+
+    _createClass(Channels, [{
+        key: 'changeChannel',
+        value: function changeChannel(event) {
+            event.preventDefault();
+            var channelname = document.querySelector('input[type=submit]').value;
+            this.props.channelSwitch(channelname);
+        }
+    }, {
+        key: 'capitalise',
+        value: function capitalise(name) {
+            return name.charAt(0).toUpperCase() + name.slice(1);
+        }
+    }, {
+        key: 'cancelOnSubmit',
+        value: function cancelOnSubmit(event) {
+            event.preventDefault();
+            document.querySelector('input[name=channelname]').value = '';
+        }
+    }, {
+        key: 'render',
+        value: function render() {
+            return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                'div',
+                { className: 'channels' },
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                    'h1',
+                    { className: 'header' },
+                    'Channels'
+                ),
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                    'p',
+                    { className: 'current' },
+                    'Current channel: ',
+                    this.capitalise(this.props.currentChannel)
+                ),
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                    'form',
+                    { action: '#', onSubmit: this.changeChannel },
+                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('input', { type: 'text', name: 'channelname' }),
+                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('input', { type: 'submit', className: 'form-submit', value: 'Connect' })
+                )
+            );
+        }
+    }]);
+
+    return Channels;
+}(__WEBPACK_IMPORTED_MODULE_0_react__["Component"]);
+
+/* harmony default export */ __webpack_exports__["a"] = (Channels);
 
 /***/ })
 /******/ ]);

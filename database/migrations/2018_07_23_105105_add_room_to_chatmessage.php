@@ -13,7 +13,9 @@ class AddRoomToChatmessage extends Migration
      */
     public function up()
     {
-
+        Schema::table('chat_messages', function (Blueprint $schema) {
+            $schema->string('room');
+        });
     }
 
     /**
@@ -23,6 +25,8 @@ class AddRoomToChatmessage extends Migration
      */
     public function down()
     {
-        //
+        Schema::table('chat_messages', function (Blueprint $schema) {
+            $schema->dropColumn('room');
+        });
     }
 }

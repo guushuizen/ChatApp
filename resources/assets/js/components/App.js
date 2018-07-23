@@ -14,13 +14,15 @@ export default class App extends Component {
             connection: new WebSocket("ws://" + window.location.hostname + ":8090"),
             messages: [],
             register: false,
-            successfulRegistration: false
+            successfulRegistration: false,
+            room: ''
         };
         this.handleLogin = this.handleLogin.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleNewMessage = this.handleNewMessage.bind(this);
         this.showRegisterForm = this.showRegisterForm.bind(this);
         this.handleSuccessfulRegistration = this.handleSuccessfulRegistration.bind(this);
+        this.handleChannelSwitch = this.handleChannelSwitch.bind(this);
 
         this.state.connection.onmessage = this.handleNewMessage;
     }
@@ -83,12 +85,43 @@ export default class App extends Component {
             });
 
             this.setState({
+                room: data.room,
                 messages: newMessages
             });
 
             document.querySelector('.box-container').scrollTop = document.querySelector('.box-container').scrollHeight;
+        } else
+        if (data.type === 'room-switch') {
+            let newMessages = [];
+            let username = this.state.username;
+            console.log(data);
+
+            data.messages.map(function(message) {
+                let html = '';
+
+                if (message.username === username) {
+                    html = `<span class='username'>You:</span> ${message.message}`
+                } else {
+                    html = `<span class='username'>${message.username}:</span> ${message.message}`
+                }
+
+                let newMessage = {
+                    'id': message.id,
+                    'username': message.username,
+                    'message': message.message,
+                    'self': (message.username === username),
+                    'time': message.created_at,
+                    'html': html
+                };
+
+                newMessages.push(newMessage);
+            });
+
+            this.setState({
+                room: data.room,
+                messages: newMessages
+            });
         }
-        // console.log(this.state.messages);
     }
 
     handleLogin(username, user_id) {
@@ -117,6 +150,7 @@ export default class App extends Component {
 
         message.username = this.state.username;
         message.user_id = this.state.user_id;
+        message.room = this.state.room;
 
         this.state.connection.send(JSON.stringify(message));
     }
@@ -135,14 +169,24 @@ export default class App extends Component {
         })
     }
 
+    handleChannelSwitch(newRoom) {
+        this.state.connection.send(JSON.stringify({
+            type: 'room-switch',
+            username: this.state.username,
+            room: newRoom
+        }));
+
+        this.setState({
+            messages: []
+        });
+    }
+
     render() {
         return (
             <div className="page">
                 <Header loggedIn={this.state.loggedIn} username={this.state.username} />
 
-                { this.state.loggedIn ? <Chatbox submit={this.handleSubmit} messages={this.state.messages} /> : null}
-
-                { this.state.register ? <Register handleRegistration={this.handleSuccessfulRegistration}/> : <Login registration={this.state.successfulRegistration} login={this.handleLogin} register={this.showRegisterForm} /> }
+                { this.state.loggedIn ? <Chatbox changeChannel={this.handleChannelSwitch} currentChannel={this.state.room} submit={this.handleSubmit} messages={this.state.messages} /> : this.state.register ? <Register handleRegistration={this.handleSuccessfulRegistration}/> : <Login registration={this.state.successfulRegistration} login={this.handleLogin} register={this.showRegisterForm} />}
             </div>
         );
     }
