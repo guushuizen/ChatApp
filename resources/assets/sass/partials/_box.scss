@@ -90,9 +90,9 @@
 
 @media (min-width: 768px) {
   .chatbox {
-    width: 50%;
-    margin-left: auto;
-    margin-right: auto;
+    display: flex;
+    width: 75%;
+    flex-direction: column;
   }
 }
 

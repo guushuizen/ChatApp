@@ -83,29 +83,42 @@ class WebSocketController extends Controller implements MessageComponentInterfac
         if ($data['type'] == 'identification') {
             $this->connections[$conn->resourceId]['username'] = $data['username'];
             $this->connections[$conn->resourceId]['user_id'] = $data['user_id'];
+            $this->connections[$conn->resourceId]['channel'] = 'lobby';
 
             echo PHP_EOL . $this->connections[$conn->resourceId]['username'] . PHP_EOL;
 
             $conn->send(json_encode(array(
                 'type' => 'welcome',
-                'messages' => ChatMessage::orderByDesc('created_at')->get(),
+                'room' => 'lobby',
+                'messages' => ChatMessage::where('room', 'lobby')->orderByDesc('created_at')->get(),
             )));
-
-            echo 'sent messages';
 
             echo PHP_EOL . 'Connection with ID: ' . $conn->resourceId . ' connected with username ' . $msg;
         } else
         if ($data['type'] == 'new_message') {
+            echo PHP_EOL . var_dump($data) . PHP_EOL;
             // Not first message, thus we add the $msg to the owner's messages list and broadcast the message.
             $newMessage = ChatMessage::create(array(
                 'user_id' => $this->connections[$conn->resourceId]['user_id'],
                 'username' => $this->connections[$conn->resourceId]['username'],
+                'room' => $data['room'],
                 'message' => $data['message'],
                 'created_at' => date('j/m/Y G:i')
             ));
 
             $this->broadcast($newMessage);
             echo PHP_EOL . 'New message from ' . $this->connections[$conn->resourceId]['username'] . ': ' . $msg;
+        } else
+        if ($data['type'] == 'room-switch') {
+            $this->connections[$conn->resourceId]['channel'] = $data['room'];
+
+            $conn->send(json_encode(array(
+                'type' => 'room-switch',
+                'room' => $data['room'],
+                'messages' => ChatMessage::where('room', $data['room'])->orderByDesc('created_at')->get(),
+            )));
+
+            echo PHP_EOL . 'User ' . $data['username'] . ' switched to channel ' . $data['room'];
         }
     }
 
@@ -120,6 +133,7 @@ class WebSocketController extends Controller implements MessageComponentInterfac
             $connection['conn']->send(json_encode(array(
                 'id' => $msg->id,
                 'type' => 'new_message',
+                'room' => $msg->room,
                 'message' => $msg->message,
                 'username' => $msg->username,
                 'created_at' => $msg->created_at

@@ -10,7 +10,7 @@ class ChatMessage extends Model
      *  Mass-assignable field
      */
 
-    protected $fillable = ['username', 'user_id', 'message'];
+    protected $fillable = ['username', 'user_id', 'message', 'room'];
 
     /**
      *  One To Many (Inverse) Relationship between ChatMessage and User
