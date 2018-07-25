@@ -1,4 +1,4 @@
-@import url(https://fonts.googleapis.com/css?family=Roboto:300,400,700);@import url(https://fonts.googleapis.com/css?family=Open+Sans:300,400,700);@media (max-width: 768px) {
+@import url(https://fonts.googleapis.com/css?family=Roboto:300,400,700);@import url(https://fonts.googleapis.com/css?family=Open+Sans:300,400,500,700);@media (max-width: 768px) {
   .container,
   .chat-container {
     width: 100%;
@@ -43,6 +43,23 @@ body {
   background-color: #386FA4;
 }
 
+button.btn {
+  display: block;
+  margin: 1rem auto 0;
+  background-color: #59A5D8;
+  border: 2px solid #386FA4;
+  padding: .5rem 1rem;
+  border-radius: 5px;
+  font-size: 1rem;
+  color: white;
+  font-weight: 700;
+}
+
+button.btn:hover {
+  cursor: pointer;
+  background-color: #386FA4;
+}
+
 .page-header {
   background-color: #386FA4;
   font-family: 'Roboto', sans-serif;
@@ -54,6 +71,10 @@ body {
 .page-header p.user-welcome {
   font-size: 1rem;
   float: right;
+}
+
+.page-header p.user-welcome:hover {
+  cursor: pointer;
 }
 
 .login-form {
@@ -479,5 +500,42 @@ p.register-link a:hover {
   display: flex;
   -ms-flex-item-align: center;
       align-self: center;
+}
+
+.modal .subheader {
+  font-weight: 700;
+  margin: 2rem 0 0 0;
+  font-size: 1.5rem;
+}
+
+.modal .header {
+  font-weight: 700;
+  font-size: 1.5rem;
+}
+
+.modal .form-group {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  margin-top: 1rem;
+}
+
+.modal .form-group label {
+  font-weight: 700;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-item-align: center;
+      align-self: center;
+}
+
+.modal .form-group input {
+  margin-left: 1rem;
+  border: 1px solid #000000;
+  border-radius: 3px;
+  padding: .25rem .5rem;
 }
 

@@ -84,7 +84,7 @@ class WebSocketController extends Controller implements MessageComponentInterfac
         if ($data['type'] == 'identification') {
             $this->connections[$conn->resourceId]['username'] = $data['username'];
             $this->connections[$conn->resourceId]['user_id'] = $data['user_id'];
-            $this->connections[$conn->resourceId]['room'] = ChatRoom::first()->name;
+            $this->connections[$conn->resourceId]['room'] = ChatRoom::firstOrCreate(['name' => 'Lobby'])->name;
 
             $conn->send(json_encode(array(
                 'type' => 'welcome',

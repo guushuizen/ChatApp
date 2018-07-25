@@ -28,6 +28,7 @@ export default class App extends Component {
         this.handleSuccessfulRegistration = this.handleSuccessfulRegistration.bind(this);
         this.handleChannelSwitch = this.handleChannelSwitch.bind(this);
         this.handleUsername = this.handleUsername.bind(this);
+        this.clearSearch = this.clearSearch.bind(this);
 
         this.state.connection.onmessage = this.handleNewMessage;
     }
@@ -203,7 +204,13 @@ export default class App extends Component {
     handleUsername(username) {
         this.setState({
             search: username
-        })
+        });
+    }
+
+    clearSearch() {
+        this.setState({
+            search: ''
+        });
     }
 
     render() {
@@ -213,7 +220,7 @@ export default class App extends Component {
 
                 { this.state.loggedIn ? <Chatbox showUser={this.handleUsername} rooms={this.state.rooms} changeChannel={this.handleChannelSwitch} currentChannel={this.state.room} submit={this.handleSubmit} messages={this.state.messages} /> : this.state.register ? <Register handleRegistration={this.handleSuccessfulRegistration}/> : <Login registration={this.state.successfulRegistration} login={this.handleLogin} register={this.showRegisterForm} />}
                 
-                <UserModal username={this.state.search} />
+                <UserModal username={this.state.search} self={this.state.search === this.state.username} clear={this.clearSearch}/>
             </div>
         );
     }
