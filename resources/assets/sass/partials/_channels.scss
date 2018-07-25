@@ -21,8 +21,26 @@
 
   }
 
-  p.current {
+  p.content {
     text-align: center;
+  }
+
+  p.ul-header {
+    margin-bottom: 0;
+  }
+
+  & ul {
+    margin: 0;
+    padding-left: 1rem;
+    list-style: none;
+
+    & li {
+      font-weight: 700;
+
+      &:hover {
+        cursor: pointer;
+      }
+    }
   }
 
   & form {

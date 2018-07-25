@@ -5,6 +5,7 @@ import Header from './Header';
 import Login from './auth/Login';
 import Chatbox from './Chatbox';
 import Register from "./auth/Register";
+import UserModal from './user/UserModal';
 
 export default class App extends Component {
     constructor(props) {
@@ -15,7 +16,10 @@ export default class App extends Component {
             messages: [],
             register: false,
             successfulRegistration: false,
-            room: ''
+            room: '',
+            rooms: [],
+            search: ''
+
         };
         this.handleLogin = this.handleLogin.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
@@ -23,12 +27,14 @@ export default class App extends Component {
         this.showRegisterForm = this.showRegisterForm.bind(this);
         this.handleSuccessfulRegistration = this.handleSuccessfulRegistration.bind(this);
         this.handleChannelSwitch = this.handleChannelSwitch.bind(this);
+        this.handleUsername = this.handleUsername.bind(this);
 
         this.state.connection.onmessage = this.handleNewMessage;
     }
 
     handleNewMessage(event) {
         let data = JSON.parse(event.data);
+        console.log(data);
         if (data.type === 'new_message') {
             let message = data.message;
             let html = '';
@@ -53,7 +59,7 @@ export default class App extends Component {
             newMessages.unshift(newMessage);
 
             this.setState({
-                'messages': newMessages
+                messages: newMessages,
             });
 
             document.querySelector('.box-container').scrollTop = document.querySelector('.box-container').scrollHeight;
@@ -61,7 +67,39 @@ export default class App extends Component {
         if (data.type === 'welcome') {
             let newMessages = [];
             let username = this.state.username;
-            console.log(data);
+
+            data.messages.map(function(message) {
+                let html = '';
+
+                if (message.username === username) {
+                    html = `<span class='username'>You:</span> ${message.message}`
+                } else {
+                    html = `<span class='username'>${message.username}:</span> ${message.message}`
+                }
+
+                let newMessage = {
+                    'id': message.id,
+                    'username': message.username,
+                    'message': message.message,
+                    'self': (message.username === username),
+                    'time': message.created_at,
+                    'html': html
+                };
+
+                newMessages.push(newMessage);
+            });
+
+            this.setState({
+                room: data.room,
+                messages: newMessages,
+                rooms: data.rooms
+            });
+
+            document.querySelector('.box-container').scrollTop = document.querySelector('.box-container').scrollHeight;
+        } else
+        if (data.type === 'room-switch') {
+            let newMessages = [];
+            let username = this.state.username;
 
             data.messages.map(function(message) {
                 let html = '';
@@ -91,35 +129,16 @@ export default class App extends Component {
 
             document.querySelector('.box-container').scrollTop = document.querySelector('.box-container').scrollHeight;
         } else
-        if (data.type === 'room-switch') {
-            let newMessages = [];
-            let username = this.state.username;
-            console.log(data);
+        if (data.type === 'new_room') {
+            let name = data.name;
 
-            data.messages.map(function(message) {
-                let html = '';
-
-                if (message.username === username) {
-                    html = `<span class='username'>You:</span> ${message.message}`
-                } else {
-                    html = `<span class='username'>${message.username}:</span> ${message.message}`
-                }
-
-                let newMessage = {
-                    'id': message.id,
-                    'username': message.username,
-                    'message': message.message,
-                    'self': (message.username === username),
-                    'time': message.created_at,
-                    'html': html
-                };
-
-                newMessages.push(newMessage);
+            let currentRooms = this.state.rooms;
+            currentRooms.push({
+                name: name
             });
 
             this.setState({
-                room: data.room,
-                messages: newMessages
+                rooms: currentRooms
             });
         }
     }
@@ -181,12 +200,20 @@ export default class App extends Component {
         });
     }
 
+    handleUsername(username) {
+        this.setState({
+            search: username
+        })
+    }
+
     render() {
         return (
             <div className="page">
-                <Header loggedIn={this.state.loggedIn} username={this.state.username} />
+                <Header loggedIn={this.state.loggedIn} username={this.state.username} handleUsername={this.handleUsername} />
 
-                { this.state.loggedIn ? <Chatbox changeChannel={this.handleChannelSwitch} currentChannel={this.state.room} submit={this.handleSubmit} messages={this.state.messages} /> : this.state.register ? <Register handleRegistration={this.handleSuccessfulRegistration}/> : <Login registration={this.state.successfulRegistration} login={this.handleLogin} register={this.showRegisterForm} />}
+                { this.state.loggedIn ? <Chatbox showUser={this.handleUsername} rooms={this.state.rooms} changeChannel={this.handleChannelSwitch} currentChannel={this.state.room} submit={this.handleSubmit} messages={this.state.messages} /> : this.state.register ? <Register handleRegistration={this.handleSuccessfulRegistration}/> : <Login registration={this.state.successfulRegistration} login={this.handleLogin} register={this.showRegisterForm} />}
+                
+                <UserModal username={this.state.search} />
             </div>
         );
     }
