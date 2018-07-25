@@ -14,3 +14,4 @@ use Illuminate\Http\Request;
 */
 
 Route::post('/user', 'UserController@findUser');
+Route::put('/user/{id}', 'UserController@updateUser');

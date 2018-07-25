@@ -30236,6 +30236,7 @@ var App = function (_Component) {
         _this.handleSuccessfulRegistration = _this.handleSuccessfulRegistration.bind(_this);
         _this.handleChannelSwitch = _this.handleChannelSwitch.bind(_this);
         _this.handleUsername = _this.handleUsername.bind(_this);
+        _this.clearSearch = _this.clearSearch.bind(_this);
 
         _this.state.connection.onmessage = _this.handleNewMessage;
         return _this;
@@ -30420,6 +30421,13 @@ var App = function (_Component) {
             });
         }
     }, {
+        key: 'clearSearch',
+        value: function clearSearch() {
+            this.setState({
+                search: ''
+            });
+        }
+    }, {
         key: 'render',
         value: function render() {
             return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
@@ -30427,7 +30435,7 @@ var App = function (_Component) {
                 { className: 'page' },
                 __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_2__Header__["a" /* default */], { loggedIn: this.state.loggedIn, username: this.state.username, handleUsername: this.handleUsername }),
                 this.state.loggedIn ? __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_4__Chatbox__["a" /* default */], { showUser: this.handleUsername, rooms: this.state.rooms, changeChannel: this.handleChannelSwitch, currentChannel: this.state.room, submit: this.handleSubmit, messages: this.state.messages }) : this.state.register ? __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_5__auth_Register__["a" /* default */], { handleRegistration: this.handleSuccessfulRegistration }) : __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_3__auth_Login__["a" /* default */], { registration: this.state.successfulRegistration, login: this.handleLogin, register: this.showRegisterForm }),
-                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_6__user_UserModal__["a" /* default */], { username: this.state.search })
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_6__user_UserModal__["a" /* default */], { username: this.state.search, self: this.state.search === this.state.username, clear: this.clearSearch })
             );
         }
     }]);
@@ -54913,6 +54921,8 @@ var FormInput = function (_Component) {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_react__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_react_responsive_modal__ = __webpack_require__(254);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__ModalInfo__ = __webpack_require__(270);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__ModalEdit__ = __webpack_require__(269);
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -54920,6 +54930,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+
 
 
 
@@ -54934,11 +54946,14 @@ var UserModal = function (_Component) {
 
         _this.state = {
             open: false,
-            userObject: {}
+            userObject: {},
+            userInfo: {},
+            edit: false
         };
 
         _this.onCloseModal = _this.onCloseModal.bind(_this);
         _this.onOpenModal = _this.onOpenModal.bind(_this);
+        _this.updateUser = _this.updateUser.bind(_this);
         return _this;
     }
 
@@ -54951,6 +54966,7 @@ var UserModal = function (_Component) {
         key: 'onCloseModal',
         value: function onCloseModal() {
             this.setState({ open: false });
+            this.props.clear();
         }
     }, {
         key: 'fetchUser',
@@ -54969,7 +54985,8 @@ var UserModal = function (_Component) {
             }).then(function (response) {
                 response.json().then(function (data) {
                     _this2.setState({
-                        userObject: data.user
+                        userObject: data.user,
+                        userInfo: data.userInfo
                     });
                     _this2.onOpenModal();
                 });
@@ -54979,36 +54996,57 @@ var UserModal = function (_Component) {
         key: 'componentWillReceiveProps',
         value: function componentWillReceiveProps(nextProps) {
             if (nextProps.username) {
+                this.setState({
+                    self: nextProps.self
+                });
                 this.fetchUser(nextProps.username);
             }
         }
     }, {
+        key: 'updateUser',
+        value: function updateUser(user) {
+            var _this3 = this;
+
+            fetch('/api/user/' + user.username, {
+                method: 'PUT',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(user)
+            }).then(function (response) {
+                response.json().then(function (data) {
+                    console.log(data);
+                    if (data.status === 200) {
+                        _this3.onCloseModal();
+                        _this3.setState({
+                            edit: false,
+                            open: false,
+                            userObject: {},
+                            userInfo: {}
+                        });
+                    }
+                });
+            });
+        }
+    }, {
         key: 'render',
         value: function render() {
+            var _this4 = this;
+
             var open = this.state.open;
 
             return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
                 __WEBPACK_IMPORTED_MODULE_1_react_responsive_modal__["a" /* default */],
                 { open: open, onClose: this.onCloseModal, center: true },
                 __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                    'p',
-                    null,
-                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                        'b',
-                        null,
-                        'Username: '
-                    ),
-                    this.state.userObject.username
-                ),
-                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                    'p',
-                    null,
-                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                        'b',
-                        null,
-                        'Email: '
-                    ),
-                    this.state.userObject.email
+                    'div',
+                    { className: 'modal' },
+                    this.state.edit ? __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_3__ModalEdit__["a" /* default */], { userInfo: this.state.userInfo, userObject: this.state.userObject,
+                        edit: this.updateUser }) : __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_2__ModalInfo__["a" /* default */], { userInfo: this.state.userInfo, userObject: this.state.userObject,
+                        self: this.state.self, edit: function edit() {
+                            _this4.setState({ edit: true });
+                        } })
                 )
             );
         }
@@ -57230,6 +57268,262 @@ exports.default = (0, _reactLifecyclesCompat.polyfill)(Transition);
 /***/ (function(module, exports) {
 
 // removed by extract-text-webpack-plugin
+
+/***/ }),
+/* 265 */,
+/* 266 */,
+/* 267 */,
+/* 268 */,
+/* 269 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_react__);
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+
+
+var ModalEdit = function (_Component) {
+    _inherits(ModalEdit, _Component);
+
+    function ModalEdit(props) {
+        _classCallCheck(this, ModalEdit);
+
+        var _this = _possibleConstructorReturn(this, (ModalEdit.__proto__ || Object.getPrototypeOf(ModalEdit)).call(this, props));
+
+        var user = {};
+        Object.keys(props.userInfo).forEach(function (element) {
+            user[element] = props.userInfo[element];
+        });
+        Object.keys(props.userObject).forEach(function (element) {
+            user[element] = props.userObject[element];
+        });
+
+        _this.state = {
+            user: user
+        };
+
+        _this.handleChange = _this.handleChange.bind(_this);
+        _this.update = _this.update.bind(_this);
+        return _this;
+    }
+
+    _createClass(ModalEdit, [{
+        key: "update",
+        value: function update(event) {
+            event.preventDefault();
+            this.props.edit(this.state.user);
+        }
+    }, {
+        key: "handleChange",
+        value: function handleChange(event) {
+            console.log(event.target);
+            var user = this.state.user;
+            user[event.target.name] = event.target.value;
+
+            this.setState({
+                user: user
+            });
+        }
+    }, {
+        key: "render",
+        value: function render() {
+            return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.Fragment,
+                null,
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                    "form",
+                    { action: "#", onSubmit: this.update },
+                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                        "p",
+                        { className: "header" },
+                        "User: ",
+                        this.state.user.username
+                    ),
+                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                        "div",
+                        { className: "form-group" },
+                        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                            "label",
+                            { htmlFor: "email" },
+                            "Email:"
+                        ),
+                        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("input", { type: "email", name: "email", value: this.state.user.email, onChange: this.handleChange })
+                    ),
+                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                        "div",
+                        { className: "form-group" },
+                        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                            "label",
+                            { htmlFor: "phone-number" },
+                            "Phone number:"
+                        ),
+                        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("input", { type: "text", name: "phone_number", value: this.state.user.phone_number, onChange: this.handleChange })
+                    ),
+                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                        "p",
+                        { className: "subheader" },
+                        "Address"
+                    ),
+                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                        "div",
+                        { className: "form-group" },
+                        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                            "label",
+                            { htmlFor: "street-address" },
+                            "Street address:"
+                        ),
+                        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("input", { type: "text", name: "street_address", value: this.state.user.street_address, onChange: this.handleChange })
+                    ),
+                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                        "div",
+                        { className: "form-group" },
+                        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                            "label",
+                            { htmlFor: "postal-code" },
+                            "Postal code:"
+                        ),
+                        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("input", { type: "text", name: "postal_code", value: this.state.user.postal_code, onChange: this.handleChange })
+                    ),
+                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                        "div",
+                        { className: "form-group" },
+                        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                            "label",
+                            { htmlFor: "city" },
+                            "City:"
+                        ),
+                        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("input", { type: "text", name: "city", value: this.state.user.city, onChange: this.handleChange })
+                    ),
+                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("input", { type: "submit", className: "form-submit", value: "Submit" })
+                )
+            );
+        }
+    }]);
+
+    return ModalEdit;
+}(__WEBPACK_IMPORTED_MODULE_0_react__["Component"]);
+
+/* harmony default export */ __webpack_exports__["a"] = (ModalEdit);
+
+/***/ }),
+/* 270 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_react__);
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+
+
+var ModalInfo = function (_Component) {
+    _inherits(ModalInfo, _Component);
+
+    function ModalInfo(props) {
+        _classCallCheck(this, ModalInfo);
+
+        return _possibleConstructorReturn(this, (ModalInfo.__proto__ || Object.getPrototypeOf(ModalInfo)).call(this, props));
+    }
+
+    _createClass(ModalInfo, [{
+        key: "render",
+        value: function render() {
+            return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.Fragment,
+                null,
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                    "p",
+                    { className: "header" },
+                    "User: ",
+                    this.props.userObject.username
+                ),
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                    "p",
+                    null,
+                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                        "b",
+                        null,
+                        "Email: "
+                    ),
+                    this.props.userObject.email
+                ),
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                    "p",
+                    null,
+                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                        "b",
+                        null,
+                        "Phone Number: "
+                    ),
+                    this.props.userInfo.phone_number
+                ),
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                    "p",
+                    { className: "subheader" },
+                    "Address"
+                ),
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                    "p",
+                    null,
+                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                        "b",
+                        null,
+                        "Street address: "
+                    ),
+                    this.props.userInfo.street_address
+                ),
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                    "p",
+                    null,
+                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                        "b",
+                        null,
+                        "Postal code: "
+                    ),
+                    this.props.userInfo.postal_code
+                ),
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                    "p",
+                    null,
+                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                        "b",
+                        null,
+                        "City: "
+                    ),
+                    this.props.userInfo.city
+                ),
+                this.props.self && __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.Fragment,
+                    null,
+                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("hr", null),
+                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                        "button",
+                        { className: "btn btn-primary", onClick: this.props.edit },
+                        "Edit"
+                    )
+                )
+            );
+        }
+    }]);
+
+    return ModalInfo;
+}(__WEBPACK_IMPORTED_MODULE_0_react__["Component"]);
+
+/* harmony default export */ __webpack_exports__["a"] = (ModalInfo);
 
 /***/ })
 /******/ ]);

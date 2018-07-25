@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import Modal from 'react-responsive-modal';
+import ModalInfo from './ModalInfo';
+import ModalEdit from "./ModalEdit";
 
 export default class UserModal extends Component {
 
@@ -8,11 +10,14 @@ export default class UserModal extends Component {
 
         this.state = {
             open: false,
-            userObject: {}
+            userObject: {},
+            userInfo: {},
+            edit: false,
         };
 
         this.onCloseModal = this.onCloseModal.bind(this);
         this.onOpenModal = this.onOpenModal.bind(this);
+        this.updateUser = this.updateUser.bind(this);
     }
 
     onOpenModal() {
@@ -21,6 +26,7 @@ export default class UserModal extends Component {
 
     onCloseModal() {
         this.setState({ open: false });
+        this.props.clear();
     };
 
     fetchUser(username) {
@@ -36,7 +42,8 @@ export default class UserModal extends Component {
         }).then((response) => {
             response.json().then((data) => {
                 this.setState({
-                    userObject: data.user
+                    userObject: data.user,
+                    userInfo: data.userInfo
                 });
                 this.onOpenModal();
             });
@@ -45,16 +52,49 @@ export default class UserModal extends Component {
 
     componentWillReceiveProps(nextProps) {
         if (nextProps.username) {
+            this.setState({
+                self: nextProps.self
+            });
             this.fetchUser(nextProps.username);
         }
+    }
+
+    updateUser(user) {
+        fetch(`/api/user/${user.username}`, {
+            method: 'PUT',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(user)
+        }).then((response) => {
+            response.json().then((data) => {
+                console.log(data);
+                 if (data.status === 200) {
+                     this.onCloseModal();
+                     this.setState({
+                         edit: false,
+                         open: false,
+                         userObject: {},
+                         userInfo: {},
+                     });
+                 }
+            });
+        })
     }
 
     render() {
         let { open } = this.state;
         return (
             <Modal open={open} onClose={this.onCloseModal} center>
-                <p><b>Username: </b>{this.state.userObject.username}</p>
-                <p><b>Email: </b>{this.state.userObject.email}</p>
+                <div className="modal">
+                    {this.state.edit
+                        ? <ModalEdit userInfo={this.state.userInfo} userObject={this.state.userObject}
+                               edit={this.updateUser} />
+                        : <ModalInfo userInfo={this.state.userInfo} userObject={this.state.userObject}
+                               self={this.state.self} edit={() => { this.setState({edit: true}); } } />
+                    }
+                </div>
             </Modal>
         );
     }

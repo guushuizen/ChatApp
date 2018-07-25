@@ -1,6 +1,6 @@
 // local/vendor
 @import url('https://fonts.googleapis.com/css?family=Roboto:300,400,700');
-@import url('https://fonts.googleapis.com/css?family=Open+Sans:300,400,700');
+@import url('https://fonts.googleapis.com/css?family=Open+Sans:300,400,500,700');
 @import 'variables';
 
 //modules
@@ -15,3 +15,4 @@
 @import 'partials/messages';
 @import 'partials/register';
 @import 'partials/channels';
+@import 'partials/modal';
