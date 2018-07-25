@@ -10,7 +10,7 @@ class ChatMessage extends Model
      *  Mass-assignable field
      */
 
-    protected $fillable = ['username', 'user_id', 'message', 'room'];
+    protected $fillable = ['username', 'user_id', 'message', 'chatroom_id'];
 
     /**
      *  One To Many (Inverse) Relationship between ChatMessage and User
@@ -18,5 +18,13 @@ class ChatMessage extends Model
 
     public function user() {
         $this->belongsTo('App\User');
+    }
+
+    /**
+     * One To Many (Inverse) Relationship between ChatMessage and ChatRoom
+     */
+
+    public function chatroom() {
+        $this->belongsTo('App\ChatRoom');
     }
 }

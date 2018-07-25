@@ -10,15 +10,16 @@ export default class Chatbox extends Component {
     }
 
     render() {
+
         return (
             <div className="chat-container">
                 <div className="chatbox">
                     <h1 className="form-header">Message Centre</h1>
-                    <Box messages={this.props.messages}/>
+                    <Box messages={this.props.messages} showUser={this.props.showUser} />
                     <Form submit={this.props.submit} />
                 </div>
 
-                <Channels channelSwitch={this.props.changeChannel} currentChannel={this.props.currentChannel} />
+                <Channels channelSwitch={this.props.changeChannel} currentChannel={this.props.currentChannel} rooms={this.props.rooms} />
             </div>
         )
     }

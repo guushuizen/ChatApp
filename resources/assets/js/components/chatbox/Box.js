@@ -20,8 +20,8 @@ export default class Box extends Component {
                     { this.props.messages.map(function (message, i, messages) {
                         return (
                             <React.Fragment key={message.id + '-div'}>
+                                <Message message={message} key={message.id} showUser={this.props.showUser} />
                                 <Splitter messages={messages} currentIndex={i} key={message.id + "-splitter"}/>
-                                <Message message={message} key={message.id} />
                             </React.Fragment>
                         );
                     }, this)}
