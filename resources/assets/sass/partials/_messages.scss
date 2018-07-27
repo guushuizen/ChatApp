@@ -62,11 +62,20 @@
       margin-top: 1rem;
       max-width: 250px;
       display: flex;
-      max-width: 100%;
+
+      & p {
+        margin: 0;
+      }
 
       & span.username {
         font-weight: 700;
         margin-right: 3px;
+      }
+    }
+
+    &.file {
+      .message {
+        flex-direction: column;
       }
     }
   }

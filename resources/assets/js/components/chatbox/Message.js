@@ -25,13 +25,25 @@ export default class Message extends Component {
     }
 
     render() {
+        const self = this.props.message.self;
+        const file = this.props.message.file;
+        const className = `message-wrapper ${self ? 'self' : ''} ${file ? 'file' : ''}`
+
         return (
-            <div className={this.props.message.self ? "message-wrapper self" : "message-wrapper"}>
+            <div className={className}>
                 <div className="message" onClick={this.showUserModal}>
                     {renderHTML(this.props.message.html)}
                 </div>
                 <p className="time">{this.getTime(this.props.message.time)}</p>
             </div>
         );
+    }
+
+    componentDidMount() {
+        document.querySelectorAll('.message-wrapper a').forEach(function(element) {
+            element.addEventListener('click', function(event) {
+                event.stopPropagation();
+            })
+        })
     }
 }

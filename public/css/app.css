@@ -1,4 +1,4 @@
-@import url(https://fonts.googleapis.com/css?family=Roboto:300,400,700);@import url(https://fonts.googleapis.com/css?family=Open+Sans:300,400,500,700);@media (max-width: 768px) {
+@import url(https://fonts.googleapis.com/css?family=Roboto:300,400,700);@import url(https://fonts.googleapis.com/css?family=Raleway:300,400,700);@media (max-width: 768px) {
   .container,
   .chat-container {
     width: 100%;
@@ -23,7 +23,7 @@
 body {
   padding: 0;
   margin: 0;
-  font-family: "Roboto", sans-serif;
+  font-family: "Raleway", sans-serif;
 }
 
 .form-submit {
@@ -132,7 +132,7 @@ p.register-link a:hover {
 }
 
 .form-header {
-  font-family: 'Open Sans', sans-serif;
+  font-family: 'Raleway', sans-serif;
   letter-spacing: -1px;
   text-align: center;
   margin: 0;
@@ -196,6 +196,9 @@ p.register-link a:hover {
   width: 100%;
   text-align: center;
   margin-top: 1rem;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
 }
 
 .chatbox .reply-form .form-header {
@@ -210,17 +213,66 @@ p.register-link a:hover {
   border-radius: 10px;
   background-color: #f2f2f2;
   padding: .5rem 1rem;
-  font-family: 'Open Sans', sans-serif;
+  font-family: 'Raleway', sans-serif;
   color: #000;
 }
 
 .chatbox .reply-form .button-wrapper {
-  display: inline-block;
-  vertical-align: super;
+  display: -webkit-inline-box;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  width: 13%;
+}
+
+.chatbox .reply-form .upload {
+  background-color: #F2F2F2;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  margin: 0 auto 0.5rem auto;
+}
+
+.chatbox .reply-form .upload img {
+  width: 70%;
+  height: 70%;
+  margin: 0 auto;
+}
+
+.chatbox .reply-form .upload:hover {
+  cursor: pointer;
+}
+
+.chatbox .reply-form .hidden {
+  display: none;
+}
+
+.chatbox .reply-form .uploading {
+  margin: 1rem 0 0 0.5rem;
+  width: 100%;
+}
+
+.chatbox .reply-form input[type=file] {
+  display: none;
 }
 
 .chatbox .reply-form input[type=submit] {
-  margin-left: 1rem;
   background-color: #6956B3;
   border: 0;
   color: #ffffff;
@@ -228,6 +280,8 @@ p.register-link a:hover {
   padding: .5rem 1rem;
   vertical-align: super;
   text-transform: uppercase;
+  -ms-flex-item-align: center;
+      align-self: center;
 }
 
 @media (min-width: 768px) {
@@ -341,12 +395,22 @@ p.register-link a:hover {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
-  max-width: 100%;
+}
+
+#messages .message-wrapper .message p {
+  margin: 0;
 }
 
 #messages .message-wrapper .message span.username {
   font-weight: 700;
   margin-right: 3px;
+}
+
+#messages .message-wrapper.file .message {
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
 }
 
 .splitter {

@@ -1,5 +1,5 @@
 .form-header {
-  font-family: 'Open Sans', sans-serif;
+  font-family: 'Raleway', sans-serif;
   letter-spacing: -1px;
   text-align: center;
   margin: 0;
@@ -50,6 +50,7 @@
       width: 100%;
       text-align: center;
       margin-top: 1rem;
+      display: flex;
     }
 
     & .form-header {
@@ -65,18 +66,53 @@
       background-color: #f2f2f2;
       padding: .5rem 1rem;
 
-      font-family: 'Open Sans', sans-serif;
+      font-family: 'Raleway', sans-serif;
       color: #000;
 
     }
     
     & .button-wrapper {
-      display: inline-block;
-      vertical-align: super;
+      display: inline-flex;
+      flex-direction: column;
+      justify-content: space-between;
+      width: 13%;
+    }
+
+    & .upload {
+      background-color: #F2F2F2;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      margin: 0 auto 0.5rem auto;
+
+      & img {
+        width: 70%;
+        height: 70%;
+        margin: 0 auto;
+      }
+      
+      &:hover {
+        cursor: pointer;
+      }
+    }
+
+    & .hidden {
+      display: none;
+    }
+
+    & .uploading {
+      margin: 1rem 0 0 0.5rem;
+      width: 100%;
+    }
+
+    & input[type=file] {
+      display: none;
     }
 
     & input[type=submit] {
-      margin-left: 1rem;
       background-color: #6956B3;
       border: 0;
       color: #ffffff;
@@ -84,6 +120,7 @@
       padding: .5rem 1rem;
       vertical-align: super;
       text-transform: uppercase;
+      align-self: center;
     }
   }
 }

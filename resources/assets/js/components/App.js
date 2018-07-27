@@ -35,7 +35,6 @@ export default class App extends Component {
 
     handleNewMessage(event) {
         let data = JSON.parse(event.data);
-        console.log(data);
         if (data.type === 'new_message') {
             let message = data.message;
             let html = '';
@@ -51,10 +50,37 @@ export default class App extends Component {
                 'username': data.username,
                 'message': data.message,
                 'self': (this.state.username === data.username),
-                'html': html
+                'html': html,
+                'time': data.message.created_at,
+                'file': false
             };
 
             // this.state.messages.push(newMessage);
+
+            let newMessages = this.state.messages;
+            newMessages.unshift(newMessage);
+
+            this.setState({
+                messages: newMessages,
+            });
+
+            document.querySelector('.box-container').scrollTop = document.querySelector('.box-container').scrollHeight;
+        } else
+        if (data.type === 'new_file') {
+            console.log('new file: ', data);
+
+            const html = `<p><b>${data.message.username === this.state.username ? 'You' : data.message.username}</b> uploaded a file.</p>
+                          <p><a href="${data.message.file_url}" download>Click here to download</a></p>`;
+
+            const newMessage = {
+                'id': data.id,
+                'username': data.message.username,
+                'message': data.message.message,
+                'self': (this.state.username === data.message.username),
+                'html': html,
+                'time': data.message.created_at,
+                'file': true
+            };
 
             let newMessages = this.state.messages;
             newMessages.unshift(newMessage);
@@ -70,24 +96,43 @@ export default class App extends Component {
             let username = this.state.username;
 
             data.messages.map(function(message) {
-                let html = '';
+                if (message.file_url) {
+                    const html = `<p><b>${message.username === username ? 'You' : message.username}</b> uploaded a file.</p>
+                                  <p><a href="${message.file_url}" download >Click here to download</a></p>`;
 
-                if (message.username === username) {
-                    html = `<span class='username'>You:</span> ${message.message}`
+                    const newMessage = {
+                        'id': message.id,
+                        'username': message.username,
+                        'message': message.message,
+                        'self': (username === message.username),
+                        'html': html,
+                        'time': message.created_at,
+                        'file': true
+                    };
+
+                    newMessages.push(newMessage);
+
                 } else {
-                    html = `<span class='username'>${message.username}:</span> ${message.message}`
+                    let html = '';
+
+                    if (message.username === username) {
+                        html = `<span class='username'>You:</span> ${message.message}`
+                    } else {
+                        html = `<span class='username'>${message.username}:</span> ${message.message}`
+                    }
+
+                    let newMessage = {
+                        'id': message.id,
+                        'username': message.username,
+                        'message': message.message,
+                        'self': (message.username === username),
+                        'time': message.created_at,
+                        'html': html,
+                        'file': false
+                    };
+
+                    newMessages.push(newMessage);
                 }
-
-                let newMessage = {
-                    'id': message.id,
-                    'username': message.username,
-                    'message': message.message,
-                    'self': (message.username === username),
-                    'time': message.created_at,
-                    'html': html
-                };
-
-                newMessages.push(newMessage);
             });
 
             this.setState({
@@ -103,24 +148,43 @@ export default class App extends Component {
             let username = this.state.username;
 
             data.messages.map(function(message) {
-                let html = '';
+                if (message.file_url) {
+                    const html = `<p><b>${message.username === username ? 'You' : message.username}</b> uploaded a file.</p>
+                                  <p><a href="${message.file_url}" download >Click here to download</a></p>`;
 
-                if (message.username === username) {
-                    html = `<span class='username'>You:</span> ${message.message}`
+                    const newMessage = {
+                        'id': message.id,
+                        'username': message.username,
+                        'message': message.message,
+                        'self': (username === message.username),
+                        'html': html,
+                        'time': message.created_at,
+                        'file': true
+                    };
+
+                    newMessages.push(newMessage);
+
                 } else {
-                    html = `<span class='username'>${message.username}:</span> ${message.message}`
+                    let html = '';
+
+                    if (message.username === username) {
+                        html = `<span class='username'>You:</span> ${message.message}`
+                    } else {
+                        html = `<span class='username'>${message.username}:</span> ${message.message}`
+                    }
+
+                    let newMessage = {
+                        'id': message.id,
+                        'username': message.username,
+                        'message': message.message,
+                        'self': (message.username === username),
+                        'time': message.created_at,
+                        'html': html,
+                        'file': false
+                    };
+
+                    newMessages.push(newMessage);
                 }
-
-                let newMessage = {
-                    'id': message.id,
-                    'username': message.username,
-                    'message': message.message,
-                    'self': (message.username === username),
-                    'time': message.created_at,
-                    'html': html
-                };
-
-                newMessages.push(newMessage);
             });
 
             this.setState({
@@ -218,7 +282,7 @@ export default class App extends Component {
             <div className="page">
                 <Header loggedIn={this.state.loggedIn} username={this.state.username} handleUsername={this.handleUsername} />
 
-                { this.state.loggedIn ? <Chatbox showUser={this.handleUsername} rooms={this.state.rooms} changeChannel={this.handleChannelSwitch} currentChannel={this.state.room} submit={this.handleSubmit} messages={this.state.messages} /> : this.state.register ? <Register handleRegistration={this.handleSuccessfulRegistration}/> : <Login registration={this.state.successfulRegistration} login={this.handleLogin} register={this.showRegisterForm} />}
+                { this.state.loggedIn ? <Chatbox username={this.state.username} showUser={this.handleUsername} rooms={this.state.rooms} changeChannel={this.handleChannelSwitch} currentChannel={this.state.room} submit={this.handleSubmit} messages={this.state.messages} /> : this.state.register ? <Register handleRegistration={this.handleSuccessfulRegistration}/> : <Login registration={this.state.successfulRegistration} login={this.handleLogin} register={this.showRegisterForm} />}
                 
                 <UserModal username={this.state.search} self={this.state.search === this.state.username} clear={this.clearSearch}/>
             </div>
