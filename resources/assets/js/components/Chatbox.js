@@ -16,7 +16,7 @@ export default class Chatbox extends Component {
                 <div className="chatbox">
                     <h1 className="form-header">Message Centre</h1>
                     <Box messages={this.props.messages} showUser={this.props.showUser} />
-                    <Form submit={this.props.submit} />
+                    <Form submit={this.props.submit} username={this.props.username} />
                 </div>
 
                 <Channels channelSwitch={this.props.changeChannel} currentChannel={this.props.currentChannel} rooms={this.props.rooms} />

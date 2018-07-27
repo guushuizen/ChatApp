@@ -30093,7 +30093,7 @@ var classNamesShape = exports.classNamesShape = _propTypes2.default.oneOfType([_
 /***/ (function(module, exports, __webpack_require__) {
 
 __webpack_require__(177);
-module.exports = __webpack_require__(264);
+module.exports = __webpack_require__(266);
 
 
 /***/ }),
@@ -30246,7 +30246,6 @@ var App = function (_Component) {
         key: 'handleNewMessage',
         value: function handleNewMessage(event) {
             var data = JSON.parse(event.data);
-            console.log(data);
             if (data.type === 'new_message') {
                 var message = data.message;
                 var html = '';
@@ -30262,7 +30261,9 @@ var App = function (_Component) {
                     'username': data.username,
                     'message': data.message,
                     'self': this.state.username === data.username,
-                    'html': html
+                    'html': html,
+                    'time': data.message.created_at,
+                    'file': false
                 };
 
                 // this.state.messages.push(newMessage);
@@ -30275,66 +30276,123 @@ var App = function (_Component) {
                 });
 
                 document.querySelector('.box-container').scrollTop = document.querySelector('.box-container').scrollHeight;
+            } else if (data.type === 'new_file') {
+                console.log('new file: ', data);
+
+                var _html = '<p><b>' + (data.message.username === this.state.username ? 'You' : data.message.username) + '</b> uploaded a file.</p>\n                          <p><a href="' + data.message.file_url + '" download>Click here to download</a></p>';
+
+                var _newMessage = {
+                    'id': data.id,
+                    'username': data.message.username,
+                    'message': data.message.message,
+                    'self': this.state.username === data.message.username,
+                    'html': _html,
+                    'time': data.message.created_at,
+                    'file': true
+                };
+
+                var _newMessages = this.state.messages;
+                _newMessages.unshift(_newMessage);
+
+                this.setState({
+                    messages: _newMessages
+                });
+
+                document.querySelector('.box-container').scrollTop = document.querySelector('.box-container').scrollHeight;
             } else if (data.type === 'welcome') {
-                var _newMessages = [];
+                var _newMessages2 = [];
                 var username = this.state.username;
 
                 data.messages.map(function (message) {
-                    var html = '';
+                    if (message.file_url) {
+                        var _html2 = '<p><b>' + (message.username === username ? 'You' : message.username) + '</b> uploaded a file.</p>\n                                  <p><a href="' + message.file_url + '" download >Click here to download</a></p>';
 
-                    if (message.username === username) {
-                        html = '<span class=\'username\'>You:</span> ' + message.message;
+                        var _newMessage2 = {
+                            'id': message.id,
+                            'username': message.username,
+                            'message': message.message,
+                            'self': username === message.username,
+                            'html': _html2,
+                            'time': message.created_at,
+                            'file': true
+                        };
+
+                        _newMessages2.push(_newMessage2);
                     } else {
-                        html = '<span class=\'username\'>' + message.username + ':</span> ' + message.message;
+                        var _html3 = '';
+
+                        if (message.username === username) {
+                            _html3 = '<span class=\'username\'>You:</span> ' + message.message;
+                        } else {
+                            _html3 = '<span class=\'username\'>' + message.username + ':</span> ' + message.message;
+                        }
+
+                        var _newMessage3 = {
+                            'id': message.id,
+                            'username': message.username,
+                            'message': message.message,
+                            'self': message.username === username,
+                            'time': message.created_at,
+                            'html': _html3,
+                            'file': false
+                        };
+
+                        _newMessages2.push(_newMessage3);
                     }
-
-                    var newMessage = {
-                        'id': message.id,
-                        'username': message.username,
-                        'message': message.message,
-                        'self': message.username === username,
-                        'time': message.created_at,
-                        'html': html
-                    };
-
-                    _newMessages.push(newMessage);
                 });
 
                 this.setState({
                     room: data.room,
-                    messages: _newMessages,
+                    messages: _newMessages2,
                     rooms: data.rooms
                 });
 
                 document.querySelector('.box-container').scrollTop = document.querySelector('.box-container').scrollHeight;
             } else if (data.type === 'room-switch') {
-                var _newMessages2 = [];
+                var _newMessages3 = [];
                 var _username = this.state.username;
 
                 data.messages.map(function (message) {
-                    var html = '';
+                    if (message.file_url) {
+                        var _html4 = '<p><b>' + (message.username === _username ? 'You' : message.username) + '</b> uploaded a file.</p>\n                                  <p><a href="' + message.file_url + '" download >Click here to download</a></p>';
 
-                    if (message.username === _username) {
-                        html = '<span class=\'username\'>You:</span> ' + message.message;
+                        var _newMessage4 = {
+                            'id': message.id,
+                            'username': message.username,
+                            'message': message.message,
+                            'self': _username === message.username,
+                            'html': _html4,
+                            'time': message.created_at,
+                            'file': true
+                        };
+
+                        _newMessages3.push(_newMessage4);
                     } else {
-                        html = '<span class=\'username\'>' + message.username + ':</span> ' + message.message;
+                        var _html5 = '';
+
+                        if (message.username === _username) {
+                            _html5 = '<span class=\'username\'>You:</span> ' + message.message;
+                        } else {
+                            _html5 = '<span class=\'username\'>' + message.username + ':</span> ' + message.message;
+                        }
+
+                        var _newMessage5 = {
+                            'id': message.id,
+                            'username': message.username,
+                            'message': message.message,
+                            'self': message.username === _username,
+                            'time': message.created_at,
+                            'html': _html5,
+                            'file': false
+                        };
+
+                        _newMessages3.push(_newMessage5);
                     }
-
-                    var newMessage = {
-                        'id': message.id,
-                        'username': message.username,
-                        'message': message.message,
-                        'self': message.username === _username,
-                        'time': message.created_at,
-                        'html': html
-                    };
-
-                    _newMessages2.push(newMessage);
                 });
 
                 this.setState({
                     room: data.room,
-                    messages: _newMessages2
+                    messages: _newMessages3
                 });
 
                 document.querySelector('.box-container').scrollTop = document.querySelector('.box-container').scrollHeight;
@@ -30434,7 +30492,7 @@ var App = function (_Component) {
                 'div',
                 { className: 'page' },
                 __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_2__Header__["a" /* default */], { loggedIn: this.state.loggedIn, username: this.state.username, handleUsername: this.handleUsername }),
-                this.state.loggedIn ? __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_4__Chatbox__["a" /* default */], { showUser: this.handleUsername, rooms: this.state.rooms, changeChannel: this.handleChannelSwitch, currentChannel: this.state.room, submit: this.handleSubmit, messages: this.state.messages }) : this.state.register ? __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_5__auth_Register__["a" /* default */], { handleRegistration: this.handleSuccessfulRegistration }) : __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_3__auth_Login__["a" /* default */], { registration: this.state.successfulRegistration, login: this.handleLogin, register: this.showRegisterForm }),
+                this.state.loggedIn ? __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_4__Chatbox__["a" /* default */], { username: this.state.username, showUser: this.handleUsername, rooms: this.state.rooms, changeChannel: this.handleChannelSwitch, currentChannel: this.state.room, submit: this.handleSubmit, messages: this.state.messages }) : this.state.register ? __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_5__auth_Register__["a" /* default */], { handleRegistration: this.handleSuccessfulRegistration }) : __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_3__auth_Login__["a" /* default */], { registration: this.state.successfulRegistration, login: this.handleLogin, register: this.showRegisterForm }),
                 __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_6__user_UserModal__["a" /* default */], { username: this.state.search, self: this.state.search === this.state.username, clear: this.clearSearch })
             );
         }
@@ -50895,7 +50953,7 @@ var Chatbox = function (_Component) {
                         'Message Centre'
                     ),
                     __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_1__chatbox_Box__["a" /* default */], { messages: this.props.messages, showUser: this.props.showUser }),
-                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_2__chatbox_Form__["a" /* default */], { submit: this.props.submit })
+                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_2__chatbox_Form__["a" /* default */], { submit: this.props.submit, username: this.props.username })
                 ),
                 __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_3__chatbox_Channels__["a" /* default */], { channelSwitch: this.props.changeChannel, currentChannel: this.props.currentChannel, rooms: this.props.rooms })
             );
@@ -51023,9 +51081,13 @@ var Message = function (_Component) {
     }, {
         key: 'render',
         value: function render() {
+            var self = this.props.message.self;
+            var file = this.props.message.file;
+            var className = 'message-wrapper ' + (self ? 'self' : '') + ' ' + (file ? 'file' : '');
+
             return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
                 'div',
-                { className: this.props.message.self ? "message-wrapper self" : "message-wrapper" },
+                { className: className },
                 __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
                     'div',
                     { className: 'message', onClick: this.showUserModal },
@@ -51037,6 +51099,15 @@ var Message = function (_Component) {
                     this.getTime(this.props.message.time)
                 )
             );
+        }
+    }, {
+        key: 'componentDidMount',
+        value: function componentDidMount() {
+            document.querySelectorAll('.message-wrapper a').forEach(function (element) {
+                element.addEventListener('click', function (event) {
+                    event.stopPropagation();
+                });
+            });
         }
     }]);
 
@@ -54598,6 +54669,7 @@ var Form = function (_Component) {
 
         _this.submit = _this.submit.bind(_this);
         _this.sendMessage = _this.sendMessage.bind(_this);
+        _this.handleUpload = _this.handleUpload.bind(_this);
         return _this;
     }
 
@@ -54633,6 +54705,40 @@ var Form = function (_Component) {
             });
         }
     }, {
+        key: 'openUpload',
+        value: function openUpload() {
+            document.querySelector('input[type=file]').click();
+        }
+    }, {
+        key: 'handleUpload',
+        value: function handleUpload(event) {
+            var file = event.target.files[0];
+            var formData = new FormData();
+
+            formData.append('file', file);
+            formData.append('username', this.props.username);
+
+            console.log(formData);
+
+            document.querySelector('span.uploading').classList.toggle('hidden');
+            document.querySelector('.upload').classList.toggle('hidden');
+
+            fetch('/api/chat/upload', {
+                method: 'POST',
+                body: formData
+            }).then(function (response) {
+                console.log(response);
+                response.json().then(function (data) {
+                    console.log('data from json promise: ', data);
+                });
+            }).then(function (data) {
+                console.log('data from fetch promise: ', data);
+
+                document.querySelector('span.uploading').classList.toggle('hidden');
+                document.querySelector('.upload').classList.toggle('hidden');
+            });
+        }
+    }, {
         key: 'render',
         value: function render() {
             return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
@@ -54653,7 +54759,18 @@ var Form = function (_Component) {
                         __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
                             'div',
                             { className: 'button-wrapper' },
-                            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('input', { type: 'submit', value: 'Send', className: 'btn' })
+                            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                                'span',
+                                { className: 'uploading hidden' },
+                                'Uploading...'
+                            ),
+                            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                                'div',
+                                { className: 'upload', onClick: this.openUpload, href: '#' },
+                                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('img', { src: '/img/attachment.svg' })
+                            ),
+                            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('input', { type: 'submit', value: 'Send', className: 'btn' }),
+                            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('input', { type: 'file', name: 'attachment', onChange: this.handleUpload })
                         )
                     )
                 )
@@ -54921,8 +55038,8 @@ var FormInput = function (_Component) {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_react__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_react_responsive_modal__ = __webpack_require__(254);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__ModalInfo__ = __webpack_require__(270);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__ModalEdit__ = __webpack_require__(269);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__ModalInfo__ = __webpack_require__(264);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__ModalEdit__ = __webpack_require__(265);
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -57265,16 +57382,118 @@ exports.default = (0, _reactLifecyclesCompat.polyfill)(Transition);
 
 /***/ }),
 /* 264 */
-/***/ (function(module, exports) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
-// removed by extract-text-webpack-plugin
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_react__);
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+
+
+var ModalInfo = function (_Component) {
+    _inherits(ModalInfo, _Component);
+
+    function ModalInfo(props) {
+        _classCallCheck(this, ModalInfo);
+
+        return _possibleConstructorReturn(this, (ModalInfo.__proto__ || Object.getPrototypeOf(ModalInfo)).call(this, props));
+    }
+
+    _createClass(ModalInfo, [{
+        key: "render",
+        value: function render() {
+            return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.Fragment,
+                null,
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                    "p",
+                    { className: "header" },
+                    "User: ",
+                    this.props.userObject.username
+                ),
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                    "p",
+                    null,
+                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                        "b",
+                        null,
+                        "Email: "
+                    ),
+                    this.props.userObject.email
+                ),
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                    "p",
+                    null,
+                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                        "b",
+                        null,
+                        "Phone Number: "
+                    ),
+                    this.props.userInfo.phone_number
+                ),
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                    "p",
+                    { className: "subheader" },
+                    "Address"
+                ),
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                    "p",
+                    null,
+                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                        "b",
+                        null,
+                        "Street address: "
+                    ),
+                    this.props.userInfo.street_address
+                ),
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                    "p",
+                    null,
+                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                        "b",
+                        null,
+                        "Postal code: "
+                    ),
+                    this.props.userInfo.postal_code
+                ),
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                    "p",
+                    null,
+                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                        "b",
+                        null,
+                        "City: "
+                    ),
+                    this.props.userInfo.city
+                ),
+                this.props.self && __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.Fragment,
+                    null,
+                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("hr", null),
+                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                        "button",
+                        { className: "btn btn-primary", onClick: this.props.edit },
+                        "Edit"
+                    )
+                )
+            );
+        }
+    }]);
+
+    return ModalInfo;
+}(__WEBPACK_IMPORTED_MODULE_0_react__["Component"]);
+
+/* harmony default export */ __webpack_exports__["a"] = (ModalInfo);
 
 /***/ }),
-/* 265 */,
-/* 266 */,
-/* 267 */,
-/* 268 */,
-/* 269 */
+/* 265 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -57414,116 +57633,10 @@ var ModalEdit = function (_Component) {
 /* harmony default export */ __webpack_exports__["a"] = (ModalEdit);
 
 /***/ }),
-/* 270 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
+/* 266 */
+/***/ (function(module, exports) {
 
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_react__);
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-
-
-var ModalInfo = function (_Component) {
-    _inherits(ModalInfo, _Component);
-
-    function ModalInfo(props) {
-        _classCallCheck(this, ModalInfo);
-
-        return _possibleConstructorReturn(this, (ModalInfo.__proto__ || Object.getPrototypeOf(ModalInfo)).call(this, props));
-    }
-
-    _createClass(ModalInfo, [{
-        key: "render",
-        value: function render() {
-            return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                __WEBPACK_IMPORTED_MODULE_0_react___default.a.Fragment,
-                null,
-                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                    "p",
-                    { className: "header" },
-                    "User: ",
-                    this.props.userObject.username
-                ),
-                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                    "p",
-                    null,
-                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                        "b",
-                        null,
-                        "Email: "
-                    ),
-                    this.props.userObject.email
-                ),
-                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                    "p",
-                    null,
-                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                        "b",
-                        null,
-                        "Phone Number: "
-                    ),
-                    this.props.userInfo.phone_number
-                ),
-                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                    "p",
-                    { className: "subheader" },
-                    "Address"
-                ),
-                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                    "p",
-                    null,
-                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                        "b",
-                        null,
-                        "Street address: "
-                    ),
-                    this.props.userInfo.street_address
-                ),
-                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                    "p",
-                    null,
-                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                        "b",
-                        null,
-                        "Postal code: "
-                    ),
-                    this.props.userInfo.postal_code
-                ),
-                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                    "p",
-                    null,
-                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                        "b",
-                        null,
-                        "City: "
-                    ),
-                    this.props.userInfo.city
-                ),
-                this.props.self && __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.Fragment,
-                    null,
-                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("hr", null),
-                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                        "button",
-                        { className: "btn btn-primary", onClick: this.props.edit },
-                        "Edit"
-                    )
-                )
-            );
-        }
-    }]);
-
-    return ModalInfo;
-}(__WEBPACK_IMPORTED_MODULE_0_react__["Component"]);
-
-/* harmony default export */ __webpack_exports__["a"] = (ModalInfo);
+// removed by extract-text-webpack-plugin
 
 /***/ })
 /******/ ]);

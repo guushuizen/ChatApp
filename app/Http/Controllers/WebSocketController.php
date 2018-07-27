@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\User;
 use App\ChatRoom;
+use App\User;
 use Ratchet\ConnectionInterface;
 use Ratchet\MessageComponentInterface;
 use App\ChatMessage;
+use Illuminate\Http\Request;
 
 class WebSocketController extends Controller implements MessageComponentInterface
 {
@@ -29,7 +30,7 @@ class WebSocketController extends Controller implements MessageComponentInterfac
      * WebSocketController constructor.
      */
     public function __construct() {
-        echo PHP_EOL . 'The websocket server is now listening for messages on port 8090';
+
     }
 
 
@@ -45,6 +46,8 @@ class WebSocketController extends Controller implements MessageComponentInterfac
         echo PHP_EOL . 'A new connection opened (ID: ' . $conn->resourceId . ")";
 
         $this->connections[$conn->resourceId]['conn'] = $conn;
+
+        echo var_dump($this->connections[$conn->resourceId]['conn']->resourceId);
     }
 
     /**
@@ -81,6 +84,24 @@ class WebSocketController extends Controller implements MessageComponentInterfac
     function onMessage(ConnectionInterface $conn, $msg)
     {
         $data = json_decode($msg, true);
+        if ($data['type'] == 'php_server') {
+            unset($this->connections[$conn->resourceId]);
+            $user_id = User::where('username', $data['username'])->first()->id;
+            $chatroom_id = ChatRoom::where('name', $this->searchForConn($data['username'])['room'])->first()->id;
+            $message = ChatMessage::create([
+                'message' => '',
+                'user_id' => $user_id,
+                'username' => $data['username'],
+                'chatroom_id' => $chatroom_id,
+                'file_url' => $data['path'],
+                'file_name' => $data['name']
+            ]);
+
+            $this->broadcast([
+                'type' => 'new_file',
+                'message' => $message
+            ]);
+        } else
         if ($data['type'] == 'identification') {
             $this->connections[$conn->resourceId]['username'] = $data['username'];
             $this->connections[$conn->resourceId]['user_id'] = $data['user_id'];
@@ -103,7 +124,9 @@ class WebSocketController extends Controller implements MessageComponentInterfac
                 'username' => $this->connections[$conn->resourceId]['username'],
                 'message' => $data['message'],
                 'chatroom_id' => $room->id,
-                'created_at' => date('j/m/Y G:i')
+                'created_at' => date('j/m/Y G:i'),
+                'file_url' => '',
+                'file_name' => ''
             ));
 
             $this->broadcastNew($newMessage);
@@ -137,7 +160,7 @@ class WebSocketController extends Controller implements MessageComponentInterfac
      * @param String $msg (The chat message)
      */
 
-    function broadcastNew($msg) {
+    public function broadcastNew($msg) {
         foreach ($this->connections as $connection) {
             $connection['conn']->send(json_encode(array(
                 'id' => $msg->id,
@@ -154,5 +177,15 @@ class WebSocketController extends Controller implements MessageComponentInterfac
         foreach ($this->connections as $connection) {
             $connection['conn']->send(json_encode($msg));
         }
+    }
+
+    function searchForConn($username) {
+        foreach ($this->connections as $connection) {
+            if ($connection['username'] == $username) {
+                return $connection;
+            }
+        }
+
+        return null;
     }
 }

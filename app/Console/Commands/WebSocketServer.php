@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Http\Controllers\WebSocketController;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Artisan;
 use Ratchet\Http\HttpServer;
 use Ratchet\Server\IoServer;
 use Ratchet\WebSocket\WsServer;
@@ -52,5 +53,6 @@ class WebSocketServer extends Command
             8090
         );
         $server->run();
+        echo PHP_EOL . 'The websocket server is now listening for messages on port 8090';
     }
 }
